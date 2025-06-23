@@ -1,11 +1,12 @@
 // navigation/BottomTabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
 import Icon from 'react-native-vector-icons/Ionicons';
+
 import HomeScreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import AboutUsScreen from '../screens/AboutUsScreen';
+import MessageScreen from '../screens/MessageScreen';
+import AccountScreen from '../screens/AccountScreen';
+import OrderListScreen from '../screens/OrderListScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,17 +15,29 @@ const BottomTabNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#007BFF',
+        tabBarActiveTintColor: '#2e7d32',
         tabBarInactiveTintColor: 'gray',
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'Home') {
-            iconName = 'home-outline';
-          } else if (route.name === 'Settings') {
-            iconName = 'settings-outline';
-          } else if (route.name === 'About Us') {
-            iconName = 'information-circle-outline';
+          switch (route.name) {
+            case 'Home':
+              iconName = 'home-outline';
+              break;
+            case 'Message':
+              iconName = 'chatbubble-ellipses-outline';
+              break;
+            case 'Search':
+              iconName = 'search-outline';
+              break;
+            case 'My Orders':
+              iconName = 'cart-outline';
+              break;
+            case 'Account':
+              iconName = 'person-outline';
+              break;
+            default:
+              iconName = 'ellipse-outline';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -32,8 +45,10 @@ const BottomTabNavigator = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-      <Tab.Screen name="About Us" component={AboutUsScreen} />
+      <Tab.Screen name="Message" component={MessageScreen} />
+      {/* <Tab.Screen name="Search" component={SearchScreen} /> */}
+      <Tab.Screen name="My Orders" component={OrderListScreen} />
+      <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );
 };
