@@ -7,20 +7,26 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+
 } from 'react-native';
 import Header from '../components/Header';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux';
 import { addToCart, clearCart } from '../redux/cartSlice';
 import { useNavigation } from '@react-navigation/native';
+
+
 const DetailScreen = ({ route }) => {
   const { product } = route.params;
-const navigation = useNavigation();
-const dispatch = useDispatch();
-   const renderImage = () => {
-    const imageUrl = product.variants?.[0]?.values?.[0]?.image || 
-                   (product.images && product.images[0]);
-    
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+
+
+  const renderImage = () => {
+    const imageUrl = product.variants?.[0]?.values?.[0]?.image ||
+      (product.images && product.images[0]);
+
     if (!imageUrl) {
       return (
         <View style={styles.noImageContainer}>
@@ -31,13 +37,14 @@ const dispatch = useDispatch();
     }
 
     return (
-      <Image 
-        source={{ uri: imageUrl }} 
-        style={styles.image} 
-        resizeMode="cover" // Changed from 'contain' to 'cover'
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        resizeMode="cover"
       />
     );
   };
+
   const renderVariant = ({ item }) => (
     <View style={styles.variantContainer}>
       <Text style={styles.variantName}>{item.name}:</Text>
@@ -45,9 +52,9 @@ const dispatch = useDispatch();
         {item.values.map(value => (
           <View key={value._id} style={styles.variantItem}>
             {value.image && (
-              <Image 
-                source={{ uri: value.image }} 
-                style={styles.variantImage} 
+              <Image
+                source={{ uri: value.image }}
+                style={styles.variantImage}
               />
             )}
             <Text style={styles.variantText}>{value.value}</Text>
@@ -57,36 +64,33 @@ const dispatch = useDispatch();
     </View>
   );
 
-  // Function to remove HTML tags
   const cleanDescription = (html) => {
     return html.replace(/<[^>]*>/g, ' ');
   };
 
+  const cartPayload = {
+    id: product._id,
+    title: product.title,
+    salePrice: product.salePrice,
+    image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
+    deliveryCharges: product.deliveryCharges ?? 200,
+    freeShipping: product.freeShipping ?? false,
+  };
 
-  const cartPayload ={
-      id: product._id,
-      title: product.title,
-      salePrice: product.salePrice,
-      image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
-      deliveryCharges: product.deliveryCharges ?? 200,
-      freeShipping: product.freeShipping ?? false,
-    }
 
-    console.log('Cart Payload------->',typeof cartPayload.id);
+
+
 
   return (
     <View style={styles.container}>
       <Header title="Product Details" />
 
       <ScrollView>
-        {/* Product Image */}
         {renderImage()}
 
         <View style={styles.detailContainer}>
-          {/* Product Title */}
           <Text style={styles.productTitle}>{product.name}</Text>
 
-          {/* Price Information */}
           <View style={styles.priceContainer}>
             <Text style={styles.salePrice}>Rs. {product.salePrice}</Text>
             {product.price > product.salePrice && (
@@ -94,7 +98,6 @@ const dispatch = useDispatch();
             )}
           </View>
 
-          {/* Shipping Information */}
           <View style={styles.shippingContainer}>
             <Icon name="truck" size={16} color="#FF6B00" />
             <Text style={styles.shippingText}>
@@ -102,19 +105,17 @@ const dispatch = useDispatch();
             </Text>
           </View>
 
-          {/* Basic Information */}
           <View style={styles.section}>
             <View style={styles.infoRow}>
               <Icon name="tag" size={16} color="#FF6B00" style={styles.icon} />
               <Text style={styles.label}>Title:</Text>
-              <Text style={styles.value}>{product.title  || 'No Brand'}</Text>
+              <Text style={styles.value}>{product.title || 'No Brand'}</Text>
             </View>
-             <View style={styles.infoRow}>
+            <View style={styles.infoRow}>
               <Icon name="tag" size={16} color="#FF6B00" style={styles.icon} />
               <Text style={styles.label}>slug:</Text>
-              <Text style={styles.value}>{product.slug  || 'No Brand'}</Text>
+              <Text style={styles.value}>{product.slug || 'No Brand'}</Text>
             </View>
-
 
             <View style={styles.infoRow}>
               <Icon name="folder" size={16} color="#FF6B00" style={styles.icon} />
@@ -143,7 +144,6 @@ const dispatch = useDispatch();
             </View>
           </View>
 
-          {/* Variants */}
           {product.variants?.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Available Options</Text>
@@ -156,7 +156,6 @@ const dispatch = useDispatch();
             </View>
           )}
 
-          {/* Tags */}
           {product.tags?.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Tags</Text>
@@ -170,7 +169,6 @@ const dispatch = useDispatch();
             </View>
           )}
 
-          {/* Description */}
           {product.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Product Details</Text>
@@ -180,7 +178,6 @@ const dispatch = useDispatch();
             </View>
           )}
 
-          {/* Long Description */}
           {product.longDescription && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Description</Text>
@@ -189,30 +186,42 @@ const dispatch = useDispatch();
               </Text>
             </View>
           )}
+          {/* <ProductReviews productId={product._id} /> */}
+       <TouchableOpacity 
+  onPress={() => navigation.navigate('ProductReviews', {
+  productId: product?._id || product?.id
+})}
+  style={styles.reviewButton}
+>
+  <Text style={styles.reviewButtonText}>View All Reviews</Text>
+  <Icon name="chevron-right" size={16} color="#FF6B00" />
+</TouchableOpacity>
 
-          {/* Action Buttons */}
           <View style={styles.buttonContainer}>
-           <TouchableOpacity 
-  onPress={() => {
-    navigation.navigate('My Messages');
-  }}
-  style={styles.addToCartButton}
->
-  <Text style={styles.buttonText}> Chat</Text>
-</TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('ChatScreen', {
+                  image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
+                  title: product.title,
+                  price: product.salePrice,
+                  shipping: product.freeShipping ? 'Free Shipping' : `Shipping: Rs. ${product.deliveryCharges}`,
+                });
+              }}
+              style={styles.chatButton}
+            >
+              <Text style={styles.buttonText}>Chat</Text>
+            </TouchableOpacity>
 
-     <TouchableOpacity
-  onPress={() => {
-    dispatch(clearCart()); 
-    dispatch(addToCart(cartPayload));
-    navigation.navigate('CartScreens'); 
-  }}
-  style={styles.buyNowButton}
->
-  <Text style={styles.buttonText}>Buy Now</Text>
-</TouchableOpacity>
-
-           
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(clearCart());
+                dispatch(addToCart(cartPayload));
+                navigation.navigate('CartScreens');
+              }}
+              style={styles.buyNowButton}
+            >
+              <Text style={styles.buttonText}>Buy Now</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -226,13 +235,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   image: {
-    width: '100%', // Ensures full width
-    height: 360, // Fixed height
+    width: '100%',
+    height: 360,
     backgroundColor: '#f4f4f4',
-    
   },
   noImageContainer: {
-    width: '100%', // Full width for no-image container too
+    width: '100%',
     height: 360,
     backgroundColor: '#f4f4f4',
     justifyContent: 'center',
@@ -246,8 +254,7 @@ const styles = StyleSheet.create({
   detailContainer: {
     paddingHorizontal: 20,
     backgroundColor: '#fff',
-    // paddingTop: 5,
-    // paddingBottom: 10,
+    paddingBottom: 20,
   },
   productTitle: {
     fontSize: 22,
@@ -369,8 +376,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 25,
   },
-  addToCartButton: {
-    backgroundColor: '#FF6B00',
+  chatButton: {
+    backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 8,
     flex: 1,
@@ -389,6 +396,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+reviewButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: 15,
+  backgroundColor: '#f9f9f9',
+  borderRadius: 8,
+  marginVertical: 10,
+},
+reviewButtonText: {
+  color: '#FF6B00',
+  fontWeight: 'bold',
+}
+
 });
 
 export default DetailScreen;

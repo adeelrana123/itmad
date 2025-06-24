@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "835593698165",
+    "project_id": "etimad-dfeb5",
+    "storage_bucket": "etimad-dfeb5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835593698165:android:6216cf32823f3093e4313c",
+        "android_client_info": {
+          "package_name": "com.itmad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABLEBj_oGBm5LDoOMOZ48l3lF-Z0yrZc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

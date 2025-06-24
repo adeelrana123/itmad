@@ -21,21 +21,24 @@ const SignupScreen = () => {
   const [password, setPassword] = useState('');
   const userdata = { username, email, password };
 console.log("userdata is",userdata)
-  const handleSignup = async() => {
-  
-   await signup(username, email, password)
+const handleSignup = async () => {
+  try {
+    await signup(username, email, password);
 
-      .then(() => {
-        Alert.alert('Signup Success');
-        navigation.navigate('MainTabs') 
-      })
-      .catch(err =>
-        Alert.alert(
-          'Signup Failed',
-          err.response?.data?.message || err.message
-        )
-      );
-  };
+    // ✅ Save username locally
+    await AsyncStorage.setItem('username', username);
+    await AsyncStorage.setItem('avatar', '');
+
+    Alert.alert('Signup Success');
+    navigation.navigate('MainTabs');
+  } catch (err) {
+    Alert.alert(
+      'Signup Failed',
+      err.response?.data?.message || err.message
+    );
+  }
+};
+
 
   return (
     <View style={{ flex: 1 }}>

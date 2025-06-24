@@ -15,6 +15,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import AboutUsScreen from '../screens/AboutUsScreen';
 import MessageScreen from '../screens/MessageScreen';
 import HelpCenterScreen from '../screens/HelpCenterScreen';
+import ChatScreen from '../screens/ChatScreen';
+import ProductReviews from '../components/ProductReviews';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +35,9 @@ const AppNavigator = () => {
 <Stack.Screen name="Orders" component={OrderListScreen} />
      <Stack.Screen name="My Messages" component={MessageScreen} />
      <Stack.Screen name="Help Center" component={HelpCenterScreen} />
+          <Stack.Screen name="ChatScreen" component={ChatScreen} />
+           <Stack.Screen name="ProductReviews" component={ProductReviews} />
+          
     </Stack.Navigator>
   );
 };
