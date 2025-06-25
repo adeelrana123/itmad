@@ -202,6 +202,12 @@ const AccountScreen = () => {
             </View>
           ))}
         </View>
+       <TouchableOpacity 
+  style={styles.viewAllButton} 
+  onPress={() => navigation.navigate('AdminChats')}
+>
+  <Text style={styles.viewAllText}>View All Product Chats</Text>
+</TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -303,6 +309,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 4,
   },
+  viewAllButton: {
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  backgroundColor: '#007bff',
+  borderRadius: 8,
+  alignSelf: 'center',
+  marginVertical: 15,
+},
+
+viewAllText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+},
 });
 
 export default AccountScreen;

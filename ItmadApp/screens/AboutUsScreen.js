@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Header from '../components/Header';
 import useAppTheme from '../theme/useAppTheme';
+import { useNavigation } from '@react-navigation/native';
 
 const AboutUsScreen = () => {
   const colors = useAppTheme();
-
+ const navigation = useNavigation();
   return (
     <View style={{ flex: 1 }}>
       <Header title="About Us" />
@@ -41,6 +42,7 @@ const AboutUsScreen = () => {
         <Text style={[styles.footerNote, { color: colors.text }]}>
           Thank you for choosing Etimad Mart – where trust meets convenience.
         </Text>
+        
       </ScrollView>
     </View>
   );

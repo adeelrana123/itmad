@@ -25,8 +25,8 @@ const handleLogin = () => {
       await AsyncStorage.setItem('token', res.data.token);
       await AsyncStorage.setItem('username', res.data.user.username);
       await AsyncStorage.setItem('email', res.data.user.email);
-// await AsyncStorage.setItem('profileImage', res.data.user.image || '');
-//       await AsyncStorage.setItem('userId', res.data.user._id);
+await AsyncStorage.setItem('profileImage', res.data.user.image || '');
+      await AsyncStorage.setItem('userId', res.data.user._id);
      
 
       Alert.alert('Login Success', `Welcome ${res.data.user.username}`);

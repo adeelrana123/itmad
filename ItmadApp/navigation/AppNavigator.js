@@ -17,6 +17,7 @@ import MessageScreen from '../screens/MessageScreen';
 import HelpCenterScreen from '../screens/HelpCenterScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProductReviews from '../components/ProductReviews';
+import AdminChatListScreen from '../screens/AdminChatListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,7 @@ const AppNavigator = () => {
      <Stack.Screen name="Help Center" component={HelpCenterScreen} />
           <Stack.Screen name="ChatScreen" component={ChatScreen} />
            <Stack.Screen name="ProductReviews" component={ProductReviews} />
+           <Stack.Screen name="AdminChats" component={AdminChatListScreen} />
           
     </Stack.Navigator>
   );

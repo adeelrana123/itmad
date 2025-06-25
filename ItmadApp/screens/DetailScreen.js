@@ -201,6 +201,7 @@ const DetailScreen = ({ route }) => {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('ChatScreen', {
+                  chatId:chatId,
                   image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
                   title: product.title,
                   price: product.salePrice,
