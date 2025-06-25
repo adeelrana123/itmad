@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,16 +12,16 @@ import {
   Alert
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import messaging from '@react-native-firebase/messaging';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatScreen = ({ route }) => {
-  const { image, title, price, shipping, chatId } = route.params;
+  const { image, title, price, shipping } = route.params;
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [username, setUsername] = useState('User');
   const [adminMessage, setAdminMessage] = useState('');
+  const scrollViewRef = useRef();
 
   const chatCollection = firestore()
     .collection('chats')
@@ -30,17 +30,9 @@ const ChatScreen = ({ route }) => {
 
   useEffect(() => {
     const initializeChat = async () => {
-      // Get user info
       const name = await AsyncStorage.getItem('username');
       if (name) setUsername(name);
 
-      // Store FCM token for notifications
-      const userId = await AsyncStorage.getItem('userId');
-      if (userId) {
-        await storeUserToken(userId);
-      }
-
-      // Subscribe to messages
       const unsubscribe = chatCollection
         .orderBy('createdAt', 'asc')
         .onSnapshot(snapshot => {
@@ -57,18 +49,6 @@ const ChatScreen = ({ route }) => {
     initializeChat();
   }, []);
 
-  const storeUserToken = async (userId) => {
-    try {
-      const token = await messaging().getToken();
-      await firestore().collection('users').doc(userId).set({
-        fcmToken: token,
-        lastUpdated: firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-    } catch (error) {
-      console.error('Error storing FCM token:', error);
-    }
-  };
-
   const handleSend = async () => {
     if (!message.trim()) return;
 
@@ -78,7 +58,6 @@ const ChatScreen = ({ route }) => {
       const userImage = await AsyncStorage.getItem('userImage');
       const userPhone = await AsyncStorage.getItem('phoneNumber');
 
-      // Save chat info
       await firestore().collection('chats').doc(title).set({
         title: title,
         user: userName || 'User',
@@ -92,7 +71,6 @@ const ChatScreen = ({ route }) => {
         lastUpdated: firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
-      // Save message
       await chatCollection.add({
         text: message.trim(),
         sender: userName || 'User',
@@ -110,58 +88,18 @@ const ChatScreen = ({ route }) => {
   const handleAdminReply = async () => {
     if (!adminMessage.trim()) return;
 
-    try {
-      const receiverId = await AsyncStorage.getItem('userId');
-      const currentChatId = chatId || 'default_chat_id';
+    await chatCollection.add({
+      text: adminMessage.trim(),
+      sender: 'Admin',
+      createdAt: firestore.FieldValue.serverTimestamp(),
+    });
 
-      // Save to main Messages collection
-      await firestore().collection('Messages').add({
-        text: adminMessage.trim(),
-        sender: 'Admin',
-        senderId: 'admin123',
-        receiverId: receiverId,
-        chatId: currentChatId,
-        timestamp: firestore.FieldValue.serverTimestamp(),
-      });
-
-      // Save to chat-specific collection
-      await chatCollection.add({
-        text: adminMessage.trim(),
-        sender: 'Admin',
-        senderId: 'admin123',
-        createdAt: firestore.FieldValue.serverTimestamp(),
-      });
-
-      // Send notification
-      const userDoc = await firestore().collection('users').doc(receiverId).get();
-      if (userDoc.exists) {
-        const fcmToken = userDoc.data().fcmToken;
-        if (fcmToken) {
-          await messaging().sendMessage({
-            token: fcmToken,
-            notification: {
-              title: 'New message from Admin',
-              body: adminMessage.trim(),
-            },
-            data: {
-              type: 'admin_reply',
-              chatId: currentChatId,
-              click_action: 'FLUTTER_NOTIFICATION_CLICK'
-            }
-          });
-        }
-      }
-
-      setAdminMessage('');
-    } catch (error) {
-      console.error('Error sending admin reply:', error);
-      Alert.alert('Error', 'Failed to send admin reply');
-    }
+    setAdminMessage('');
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.container}>
@@ -178,10 +116,10 @@ const ChatScreen = ({ route }) => {
           <Text style={styles.productTitle}>{title}</Text>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.chatBox}
-          ref={ref => this.scrollView = ref}
-          onContentSizeChange={() => this.scrollView.scrollToEnd({ animated: true })}
+          ref={scrollViewRef}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
           {messages.length > 0 ? (
             messages.map((msg) => (
@@ -209,7 +147,6 @@ const ChatScreen = ({ route }) => {
           )}
         </ScrollView>
 
-        {/* User message input */}
         <View style={styles.inputArea}>
           <TextInput
             style={styles.input}
@@ -223,7 +160,6 @@ const ChatScreen = ({ route }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Admin reply input (only visible to admin users) */}
         <View style={styles.adminReplyContainer}>
           <TextInput
             style={styles.adminInput}
@@ -242,7 +178,7 @@ const ChatScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
     backgroundColor: '#fff'
   },
