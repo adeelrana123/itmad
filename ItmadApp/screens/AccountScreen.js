@@ -24,6 +24,31 @@ const AccountScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [avatar, setAvatar] = useState(null);
+const CLOUDINARY_UPLOAD_PRESET = 'etimad_avatar_upload';
+const CLOUDINARY_CLOUD_NAME = 'dzp0kj3rw';
+
+const uploadToCloudinary = async (fileUri) => {
+  const formData = new FormData();
+  formData.append('file', {
+    uri: fileUri,
+    type: 'image/jpeg',
+    name: 'profile.jpg',
+  });
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  try {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    return null;
+  }
+};
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -50,44 +75,56 @@ const AccountScreen = () => {
 
 
 
+const pickImage = () => {
+  Alert.alert(
+    'Select Image',
+    'Choose an option',
+    [
+      {
+        text: 'Camera',
+        onPress: () => {
+          launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
+            if (!response.didCancel && !response.errorCode) {
+              const uri = response.assets[0].uri;
+              const imageUrl = await uploadToCloudinary(uri);
+              if (imageUrl) {
+                setAvatar(imageUrl);
+                await AsyncStorage.setItem('avatar', imageUrl);
+                Alert.alert('Success', 'Profile image updated!');
+              } else {
+                Alert.alert('Upload failed', 'Unable to upload image.');
+              }
+            }
+          });
+        },
+      },
+      {
+        text: 'Gallery',
+        onPress: () => {
+          launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, async (response) => {
+            if (!response.didCancel && !response.errorCode) {
+              const uri = response.assets[0].uri;
+              const imageUrl = await uploadToCloudinary(uri);
+              if (imageUrl) {
+                setAvatar(imageUrl);
+                await AsyncStorage.setItem('avatar', imageUrl);
+                Alert.alert('Success', 'Profile image updated!');
+              } else {
+                Alert.alert('Upload failed', 'Unable to upload image.');
+              }
+            }
+          });
+        },
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+    ],
+    { cancelable: true }
+  );
+};
 
-  const pickImage = () => {
-    Alert.alert(
-      'Select Image',
-      'Choose an option',
-      [
-        {
-          text: 'Camera',
-          onPress: () => {
-            launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
-              if (!response.didCancel && !response.errorCode) {
-                const uri = response.assets[0].uri;
-                setAvatar(uri);
-                await AsyncStorage.setItem('avatar', uri);
-              }
-            });
-          },
-        },
-        {
-          text: 'Gallery',
-          onPress: () => {
-            launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, async (response) => {
-              if (!response.didCancel && !response.errorCode) {
-                const uri = response.assets[0].uri;
-                setAvatar(uri);
-                await AsyncStorage.setItem('avatar', uri);
-              }
-            });
-          },
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ],
-      { cancelable: true }
-    );
-  };
 
   const handleLogout = async () => {
     try {
@@ -180,8 +217,6 @@ const AccountScreen = () => {
         )}
         keyExtractor={(item, index) => index.toString()}
       />
-
-      {/* 👇 Show logout button only if user is logged in */}
       {user && (
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <View style={styles.menuItemLeft}>
@@ -204,7 +239,10 @@ const AccountScreen = () => {
         </View>
        <TouchableOpacity 
   style={styles.viewAllButton} 
-  onPress={() => navigation.navigate('AdminChats')}
+  onPress={() => navigation.navigate('AdminChats')
+
+    
+  }
 >
   <Text style={styles.viewAllText}>View All Product Chats</Text>
 </TouchableOpacity>

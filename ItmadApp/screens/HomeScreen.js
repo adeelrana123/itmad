@@ -51,7 +51,8 @@ useEffect(() => {
             item.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
           );
         }
-        // console.log('📦 Total fetched products:', res.data.products.length);
+        // console.log('Fetched product sample:', res.data.products[0]);
+       
         setFilteredProducts(all);
         setLoading(false);
       })
@@ -67,7 +68,7 @@ useEffect(() => {
 
   const renderProductImage = (item) => {
     const imageUri = item.variants?.[0]?.values?.[0]?.image || 
-                    (item.images && item.images[0]); // Fallback to images array
+                    (item.images && item.images[0]);
     
     if (!imageUri) {
       return (
@@ -90,7 +91,13 @@ useEffect(() => {
   const renderProductCard = ({ item }) => (
     <TouchableOpacity
       style={styles.productCard}
-      onPress={() => navigation.navigate('Detail', { product: item })}
+
+      onPress={() => navigation.navigate('Detail', {
+  product: {
+    ...item,
+  userId: item.creator || 'fallback-id',
+  },
+})}
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
@@ -280,19 +287,21 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   productImage: {
-    width: '100%',
-    height: '100%',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    width: '90%',
+    height: '90%',
+    marginTop:10,
+    margin:'auto',
+     justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
   },
   noImageContainer: {
-    width: '100%',
-    height: '100%',
+    width: '90%',
+    height: '90%',
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+   borderRadius: 10,
   },
   noImageText: {
     color: '#999',
@@ -300,7 +309,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   productInfoContainer: {
-    padding: 10,
+    paddingHorizontal: 10,
   },
   productName: {
     fontSize: 14,

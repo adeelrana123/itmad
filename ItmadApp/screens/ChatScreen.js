@@ -11,37 +11,47 @@ import {
   Platform,
   Alert
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  addDoc,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  orderBy
+} from '@react-native-firebase/firestore';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatScreen = ({ route }) => {
-  const { image, title, price, shipping } = route.params;
+  const { userId, chatId, title, image, price, shipping } = route.params;
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [username, setUsername] = useState('User');
   const [adminMessage, setAdminMessage] = useState('');
   const scrollViewRef = useRef();
 
-  const chatCollection = firestore()
-    .collection('chats')
-    .doc(title)
-    .collection('messages');
+  const db = getFirestore();
+  const chatDocRef = doc(db, 'chats', chatId);
+  const messagesCollectionRef = collection(chatDocRef, 'messages');
 
   useEffect(() => {
     const initializeChat = async () => {
       const name = await AsyncStorage.getItem('username');
       if (name) setUsername(name);
 
-      const unsubscribe = chatCollection
-        .orderBy('createdAt', 'asc')
-        .onSnapshot(snapshot => {
-          const fetched = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setMessages(fetched);
-        });
+      const q = query(messagesCollectionRef, orderBy('createdAt', 'asc'));
+
+      const unsubscribe = onSnapshot(q, snapshot => {
+        const fetched = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMessages(fetched);
+      });
 
       return unsubscribe;
     };
@@ -58,8 +68,8 @@ const ChatScreen = ({ route }) => {
       const userImage = await AsyncStorage.getItem('userImage');
       const userPhone = await AsyncStorage.getItem('phoneNumber');
 
-      await firestore().collection('chats').doc(title).set({
-        title: title,
+      await setDoc(chatDocRef, {
+        title,
         user: userName || 'User',
         userName: userName || 'User',
         userImage: userImage || '',
@@ -67,15 +77,18 @@ const ChatScreen = ({ route }) => {
         image: image || '',
         price: price || 0,
         shipping: shipping || 'N/A',
-        createdAt: firestore.FieldValue.serverTimestamp(),
-        lastUpdated: firestore.FieldValue.serverTimestamp(),
+        createdAt: serverTimestamp(),
+        lastUpdated: serverTimestamp(),
+        userId: userId,
       }, { merge: true });
 
-      await chatCollection.add({
+      await addDoc(messagesCollectionRef, {
         text: message.trim(),
         sender: userName || 'User',
         senderId: userId || '',
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        userId: userId || '',
+        receiverId: userId || '',
+        createdAt: serverTimestamp(),
       });
 
       setMessage('');
@@ -88,14 +101,67 @@ const ChatScreen = ({ route }) => {
   const handleAdminReply = async () => {
     if (!adminMessage.trim()) return;
 
-    await chatCollection.add({
-      text: adminMessage.trim(),
-      sender: 'Admin',
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    });
+    const messageText = adminMessage.trim();
 
-    setAdminMessage('');
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found. Cannot send notification.');
+      return;
+    }
+
+    try {
+      await addDoc(messagesCollectionRef, {
+        text: messageText,
+        sender: 'Admin',
+        senderId: 'admin123',
+        receiverId: userId,
+        createdAt: serverTimestamp(),
+      });
+
+      await setDoc(chatDocRef, { lastUpdated: serverTimestamp() }, { merge: true });
+
+      const userDocRef = doc(db, 'Users', userId);
+      const userSnap = await getDoc(userDocRef);
+      const oneSignalId = userSnap.data()?.oneSignalId;
+
+      if (oneSignalId) {
+        console.log('📲 OneSignal ID fetched from Firestore:', oneSignalId);
+        const res = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+         headers: {
+  'Content-Type': 'application/json',
+  Authorization: 'Bearer os_v2_app_j5sccw3bpnh6zjirf5vsujobec4dwiw5kuquruua7bt5lvwmuxie6spexvj66yp4fi5l5lpvej5lpghoretcnsianjpbp42wszt2jai'
+},
+        body: JSON.stringify({
+  app_id: '4f64215b-617b-4fec-a511-2f6b2a25c120',
+  include_player_ids: [oneSignalId],
+  headings: { en: 'Message from Admin' },
+  contents: { en: messageText },
+  data: {
+    chatId: chatId,
+    userId: userId,
+    title: title,
+    image: image,
+    price: price.toString(),
+    shipping: shipping,
+    username: username
+  }
+}),
+
+        });
+
+        const result = await res.json();
+        console.log('📦 OneSignal response:', result);
+      } else {
+        console.warn('❌ OneSignal ID not found for user:', userId);
+      }
+
+      setAdminMessage('');
+    } catch (error) {
+      console.error('Admin message error:', error);
+      Alert.alert('Error', 'Failed to send admin message');
+    }
   };
+
 
   return (
     <KeyboardAvoidingView

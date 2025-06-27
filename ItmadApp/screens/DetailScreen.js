@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-
 } from 'react-native';
 import Header from '../components/Header';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -15,16 +14,16 @@ import { useDispatch } from 'react-redux';
 import { addToCart, clearCart } from '../redux/cartSlice';
 import { useNavigation } from '@react-navigation/native';
 
-
 const DetailScreen = ({ route }) => {
   const { product } = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-
+  const selectedUserId = product.userId || product.creator || 'fallback-id';
 
   const renderImage = () => {
-    const imageUrl = product.variants?.[0]?.values?.[0]?.image ||
+    const imageUrl =
+      product.variants?.[0]?.values?.[0]?.image ||
       (product.images && product.images[0]);
 
     if (!imageUrl) {
@@ -64,28 +63,35 @@ const DetailScreen = ({ route }) => {
     </View>
   );
 
-  const cleanDescription = (html) => {
-    return html.replace(/<[^>]*>/g, ' ');
-  };
+  const cleanDescription = html => html.replace(/<[^>]*>/g, ' ');
 
   const cartPayload = {
     id: product._id,
     title: product.title,
     salePrice: product.salePrice,
-    image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
+    image:
+      product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
     deliveryCharges: product.deliveryCharges ?? 200,
     freeShipping: product.freeShipping ?? false,
   };
 
-
-
-
+  const chatPayload = {
+    userId: selectedUserId,
+    chatId: `${selectedUserId}_${product._id}`,
+    title: product.title,
+    image:
+      product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
+    price: product.salePrice,
+    shipping: product.freeShipping
+      ? 'Free Shipping'
+      : `Shipping: Rs. ${product.deliveryCharges}`,
+  };
 
   return (
     <View style={styles.container}>
       <Header title="Product Details" />
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 180 }}>
         {renderImage()}
 
         <View style={styles.detailContainer}>
@@ -101,7 +107,9 @@ const DetailScreen = ({ route }) => {
           <View style={styles.shippingContainer}>
             <Icon name="truck" size={16} color="#FF6B00" />
             <Text style={styles.shippingText}>
-              {product.freeShipping ? 'Free Shipping' : `Shipping: Rs. ${product.deliveryCharges}`}
+              {product.freeShipping
+                ? 'Free Shipping'
+                : `Shipping: Rs. ${product.deliveryCharges}`}
             </Text>
           </View>
 
@@ -113,10 +121,9 @@ const DetailScreen = ({ route }) => {
             </View>
             <View style={styles.infoRow}>
               <Icon name="tag" size={16} color="#FF6B00" style={styles.icon} />
-              <Text style={styles.label}>slug:</Text>
+              <Text style={styles.label}>Slug:</Text>
               <Text style={styles.value}>{product.slug || 'No Brand'}</Text>
             </View>
-
             <View style={styles.infoRow}>
               <Icon name="folder" size={16} color="#FF6B00" style={styles.icon} />
               <Text style={styles.label}>Category:</Text>
@@ -186,114 +193,72 @@ const DetailScreen = ({ route }) => {
               </Text>
             </View>
           )}
-          {/* <ProductReviews productId={product._id} /> */}
-       <TouchableOpacity 
-  onPress={() => navigation.navigate('ProductReviews', {
-  productId: product?._id || product?.id
-})}
-  style={styles.reviewButton}
->
-  <Text style={styles.reviewButtonText}>View All Reviews</Text>
-  <Icon name="chevron-right" size={16} color="#FF6B00" />
-</TouchableOpacity>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('ChatScreen', {
-                  
-                  image: product.variants?.[0]?.values?.[0]?.image || product.images?.[0] || '',
-                  title: product.title,
-                  price: product.salePrice,
-                  shipping: product.freeShipping ? 'Free Shipping' : `Shipping: Rs. ${product.deliveryCharges}`,
-                });
-              }}
-              style={styles.chatButton}
-            >
-              <Text style={styles.buttonText}>Chat</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                dispatch(clearCart());
-                dispatch(addToCart(cartPayload));
-                navigation.navigate('CartScreens');
-              }}
-              style={styles.buyNowButton}
-            >
-              <Text style={styles.buttonText}>Buy Now</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
+
+      {/* ✅ Fixed Bottom Buttons */}
+      <View style={styles.fixedBottomContainer}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('ProductReviews', {
+              productId: product?._id || product?.id,
+            })
+          }
+          style={styles.reviewButtonBottom}
+        >
+          <Icon name="star" size={16} color="#fff" />
+          <Text style={styles.reviewButtonTextBottom}>Reviews</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ChatScreen', chatPayload)}
+          style={styles.chatButtonBottom}
+        >
+          <Icon name="wechat" size={16} color="#fff" />
+          <Text style={styles.buttonText}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            dispatch(clearCart());
+            dispatch(addToCart(cartPayload));
+            navigation.navigate('CartScreens');
+          }}
+          style={styles.buyNowButtonBottom}
+        >
+          <Icon name="shopping-cart" size={16} color="#fff" />
+          <Text style={styles.buttonText}>Buy Now</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  image: {
-    width: '100%',
-    height: 360,
-    backgroundColor: '#f4f4f4',
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  image: { width: '95%', height: 400, alignSelf: 'center', borderRadius: 8 },
   noImageContainer: {
-    width: '100%',
-    height: 360,
+    width: '95%',
+    height: 400,
     backgroundColor: '#f4f4f4',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 8,
+    alignSelf: 'center',
   },
-  noImageText: {
-    fontSize: 18,
-    color: '#888',
-    fontWeight: '500',
-  },
-  detailContainer: {
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    paddingBottom: 20,
-  },
-  productTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-    textAlign: 'left',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  salePrice: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FF6B00',
-    marginRight: 10,
-  },
+  noImageText: { fontSize: 18, color: '#888', fontWeight: '500' },
+  detailContainer: { paddingHorizontal: 20, backgroundColor: '#fff' },
+  productTitle: { fontSize: 22, fontWeight: 'bold', color: '#333', marginVertical: 10 },
+  priceContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
+  salePrice: { fontSize: 22, fontWeight: 'bold', color: '#FF6B00', marginRight: 10 },
   originalPrice: {
     fontSize: 18,
     color: '#888',
     textDecorationLine: 'line-through',
   },
-  shippingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  shippingText: {
-    color: '#666',
-    fontSize: 16,
-    marginLeft: 5,
-  },
-  section: {
-    marginTop: 15,
-    marginBottom: 5,
-  },
+  shippingContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  shippingText: { color: '#666', fontSize: 16, marginLeft: 5 },
+  section: { marginTop: 15 },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -303,58 +268,22 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     paddingBottom: 5,
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  icon: {
-    width: 20,
-    marginRight: 5,
-  },
-  label: {
-    color: '#555',
-    width: 80,
-    fontWeight: '600',
-    marginLeft: 5,
-  },
-  value: {
-    color: '#333',
-    flex: 1,
-    flexWrap: 'wrap',
-    fontWeight: '500',
-  },
-  variantContainer: {
-    marginBottom: 15,
-  },
-  variantName: {
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#555',
-  },
-  variantValues: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
+  infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  icon: { width: 20, marginRight: 5 },
+  label: { color: '#555', width: 80, fontWeight: '600', marginLeft: 5 },
+  value: { color: '#333', flex: 1, fontWeight: '500' },
+  variantContainer: { marginBottom: 15 },
+  variantName: { fontWeight: 'bold', marginBottom: 8, color: '#555' },
+  variantValues: { flexDirection: 'row', flexWrap: 'wrap' },
   variantItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 15,
     marginBottom: 10,
   },
-  variantImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginRight: 5,
-  },
-  variantText: {
-    color: '#555',
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
+  variantImage: { width: 30, height: 30, borderRadius: 15, marginRight: 5 },
+  variantText: { color: '#555' },
+  tagsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
   tag: {
     backgroundColor: '#f0f0f0',
     borderRadius: 4,
@@ -363,54 +292,52 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
   },
-  tagText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  description: {
-    color: '#555',
-    lineHeight: 22,
-    fontSize: 14,
-  },
-  buttonContainer: {
+  tagText: { fontSize: 12, color: '#666' },
+  description: { color: '#555', lineHeight: 22, fontSize: 14 },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold', marginLeft: 5 },
+  fixedBottomContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 25,
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
-  chatButton: {
+  reviewButtonBottom: {
+    flex: 1,
+    backgroundColor: '#FFA000',
+    marginRight: 5,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  reviewButtonTextBottom: { color: '#fff', fontWeight: 'bold', marginLeft: 5 },
+  chatButtonBottom: {
+    flex: 1,
     backgroundColor: '#4CAF50',
-    padding: 15,
+    marginRight: 5,
+    padding: 12,
     borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
-  buyNowButton: {
+  buyNowButtonBottom: {
+    flex: 1,
     backgroundColor: '#FF3B30',
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
-    flex: 1,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-reviewButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: 15,
-  backgroundColor: '#f9f9f9',
-  borderRadius: 8,
-  marginVertical: 10,
-},
-reviewButtonText: {
-  color: '#FF6B00',
-  fontWeight: 'bold',
-}
-
 });
 
 export default DetailScreen;
