@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   thumbnail: {
-    width: 90,
+    width: 80,
     height: 90,
     borderRadius: 8,
     backgroundColor: '#f0f0f0',

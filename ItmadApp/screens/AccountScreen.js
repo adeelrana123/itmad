@@ -150,7 +150,7 @@ const pickImage = () => {
 
   const menuItems = [
     { title: 'My Orders', icon: 'list-alt', action: 'Orders', rightText: 'View All Orders >' },
-    { title: 'My Messages', icon: 'envelope', action: 'My Messages' },
+    { title: 'My Message', icon: 'envelope', action: 'AdminChats' },
     { title: 'Help Center', icon: 'question-circle', action: 'Help Center' },
     { title: 'Settings', icon: 'cog', action: 'Settings' },
     { title: 'About Us', icon: 'info-circle', action: 'About Us' },
@@ -237,15 +237,11 @@ const pickImage = () => {
             </View>
           ))}
         </View>
-       <TouchableOpacity 
+       {/* <TouchableOpacity 
   style={styles.viewAllButton} 
-  onPress={() => navigation.navigate('AdminChats')
-
-    
-  }
->
+  onPress={() => navigation.navigate('AdminChats')}>
   <Text style={styles.viewAllText}>View All Product Chats</Text>
-</TouchableOpacity>
+</TouchableOpacity> */}
       </View>
     </ScrollView>
   );

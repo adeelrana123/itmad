@@ -9,7 +9,6 @@ const AdminChatListScreen = () => {
   const [productChats, setProductChats] = useState([]);
   const navigation = useNavigation();
   const [avatar, setAvatar] = useState('');
-
   useEffect(() => {
     const getAvatar = async () => {
       const image = await AsyncStorage.getItem('avatar');

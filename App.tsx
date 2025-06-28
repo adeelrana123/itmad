@@ -8,9 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigate, navigationRef } from './ItmadApp/navigation/RootNavigation';
 import { LogLevel, OneSignal } from 'react-native-onesignal';
 const App = () => {
-
-
-
   OneSignal.Debug.setLogLevel(LogLevel.Verbose);
   // Initialize with your OneSignal App ID
   OneSignal.initialize('4f64215b-617b-4fec-a511-2f6b2a25c120');

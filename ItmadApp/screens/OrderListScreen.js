@@ -18,6 +18,10 @@ const OrderListScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
+
+
+  
+
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -50,7 +54,7 @@ const OrderListScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.orderCard}>
-         <Text style={styles.orderId}>Order ID: {item._id}</Text>
+
           <View style={styles.section}>
         {item.cartSummary.map((product, index) => (
           <View key={index} style={styles.productRow}>
@@ -97,7 +101,9 @@ const OrderListScreen = () => {
 
   {item.shippingAddress?.additionalInstructions ? (
     <Text style={styles.infoText}>Note: {item.shippingAddress.additionalInstructions}</Text>
-  ) : null}
+  ) : null}    
+  <Text style={styles.infoText}>Order ID: {item._id}</Text>
+ 
 </View>
 
 
@@ -135,16 +141,16 @@ const styles = StyleSheet.create({
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   orderCard: {
     backgroundColor: '#fff',
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 10,
     elevation: 3,
   },
   orderId: { fontWeight: 'bold', fontSize: 16, marginBottom: 5 },
   status: { color: '#FF6B00', fontWeight: '600' },
-  date: { fontSize: 16 },
-  total: { fontSize: 14, fontWeight: '600', marginBottom: 10 },
-  section: { marginTop: 10 },
+  date: { fontSize: 16, color: '#333', },
+  total: { fontSize: 14, fontWeight: '600', marginBottom: 10,color:'red' },
+  section: { marginTop: 1 },
   sectionTitle: { fontWeight: 'bold', marginBottom: 5 },
   productRow: {
     flexDirection: 'row',
@@ -152,8 +158,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   productImage: {
-    width: 80,
-    height: 110,
+    width: 100,
+    height: 120,
     borderRadius: 8,
     backgroundColor: '#eee',
   },

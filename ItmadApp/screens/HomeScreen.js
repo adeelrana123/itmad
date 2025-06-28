@@ -21,25 +21,25 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-const [user, setUser] = useState(null);
-const [avatar, setAvatar] = useState(null);
+  const [user, setUser] = useState(null);
+  const [avatar, setAvatar] = useState(null);
 
-useEffect(() => {
-  const fetchUserInfo = async () => {
-    const name = await AsyncStorage.getItem('username');
-    const email = await AsyncStorage.getItem('email');
-    const avatarUri = await AsyncStorage.getItem('avatar');
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const name = await AsyncStorage.getItem('username');
+      const email = await AsyncStorage.getItem('email');
+      const avatarUri = await AsyncStorage.getItem('avatar');
 
-    if (name && email) {
-      setUser({ name, email });
-      setAvatar(avatarUri);
-    } else {
-      setUser(null);
-    }
-  };
+      if (name && email) {
+        setUser({ name, email });
+        setAvatar(avatarUri);
+      } else {
+        setUser(null);
+      }
+    };
 
-  fetchUserInfo();
-}, []);
+    fetchUserInfo();
+  }, []);
   useEffect(() => {
     fetchAllProducts(1, 50)
       .then(res => {
@@ -52,7 +52,7 @@ useEffect(() => {
           );
         }
         // console.log('Fetched product sample:', res.data.products[0]);
-       
+
         setFilteredProducts(all);
         setLoading(false);
       })
@@ -67,9 +67,9 @@ useEffect(() => {
   };
 
   const renderProductImage = (item) => {
-    const imageUri = item.variants?.[0]?.values?.[0]?.image || 
-                    (item.images && item.images[0]);
-    
+    const imageUri = item.variants?.[0]?.values?.[0]?.image ||
+      (item.images && item.images[0]);
+
     if (!imageUri) {
       return (
         <View style={styles.noImageContainer}>
@@ -93,30 +93,29 @@ useEffect(() => {
       style={styles.productCard}
 
       onPress={() => navigation.navigate('Detail', {
-  product: {
-    ...item,
-  userId: item.creator || 'fallback-id',
-  },
-})}
+        product: {
+          ...item,
+          userId: item.creator || 'fallback-id',
+        },
+      })}
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
         {renderProductImage(item)}
       </View>
       <View style={styles.productInfoContainer}>
-         <View style={styles.priceContainer}>
+        <View style={styles.priceContainer}>
           <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
           {item.price > item.salePrice && (
             <Text style={styles.originalPrice}>Rs. {item.price}</Text>
           )}
         </View>
         <Text style={styles.productName} numberOfLines={1} ellipsizeMode="tail">
-          {item.title} 
+          {item.title}
         </Text>
         <Text style={styles.productCategory} numberOfLines={1} ellipsizeMode="tail">
           {item.category?.name}
         </Text>
-       
         {item.tags?.length > 0 && (
           <View style={styles.tagsContainer}>
             {item.tags.slice(0, 2).map(tag => (
@@ -132,22 +131,21 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
       {user && (
-  <View style={styles.userInfoContainer}>
-    <View style={styles.avatarWrapper}>
-      {avatar ? (
-        <Image source={{ uri: avatar }} style={styles.avatarImage} />
-      ) : (
-        <Icon name="person-circle-outline" size={50} color="#999" />
+        <View style={styles.userInfoContainer}>
+          <View style={styles.avatarWrapper}>
+            {avatar ? (
+              <Image source={{ uri: avatar }} style={styles.avatarImage} />
+            ) : (
+              <Icon name="person-circle-outline" size={50} color="#999" />
+            )}
+          </View>
+          <View>
+            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userEmail}>{user.email}</Text>
+          </View>
+        </View>
       )}
-    </View>
-    <View>
-      <Text style={styles.userName}>{user.name}</Text>
-      <Text style={styles.userEmail}>{user.email}</Text>
-    </View>
-  </View>
-)}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search for products..."
@@ -159,20 +157,18 @@ useEffect(() => {
           clearButtonMode="while-editing"
           underlineColorAndroid="transparent"
         />
-        <TouchableOpacity 
-          style={styles.searchIconButton} 
+        <TouchableOpacity
+          style={styles.searchIconButton}
           onPress={handleSearch}
           activeOpacity={0.7}
         >
           <Icon name="search" size={20} color="white" />
         </TouchableOpacity>
       </View>
-
       {/* Flash Sale Title */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Flash Sale</Text>
       </View>
-
       {loading ? (
         <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
       ) : (
@@ -194,14 +190,12 @@ useEffect(() => {
     </View>
   );
 };
-
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 30) / 2;
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
+  container: {
+    flex: 1,
     backgroundColor: '#fff',
-    // paddingTop: Platform.OS === 'ios' ? 50 : 10, // Adjust for iOS status bar
   },
   searchContainer: {
     flexDirection: 'row',
@@ -209,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     backgroundColor: '#fff',
-    zIndex: 1, 
+    zIndex: 1,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -227,13 +221,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 10,
-    paddingRight: 50, 
+    paddingRight: 50,
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
     fontSize: 16,
     ...Platform.select({
       android: {
-        paddingVertical: 8, 
+        paddingVertical: 8,
       },
     }),
   },
@@ -261,9 +255,11 @@ const styles = StyleSheet.create({
   gridContainer: {
     paddingHorizontal: 10,
     paddingBottom: 20,
+
   },
   columnWrapper: {
     justifyContent: 'space-between',
+    
   },
   productCard: {
     width: cardWidth,
@@ -287,21 +283,21 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   productImage: {
-    width: '90%',
-    height: '90%',
-    marginTop:10,
-    margin:'auto',
-     justifyContent: 'center',
+    width: '95%',
+    height: 180,
+    marginTop: 2,
+    margin: 'auto',
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
   },
   noImageContainer: {
-    width: '90%',
-    height: '90%',
+    width: '95%',
+     height: 180,
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
-   borderRadius: 10,
+    borderRadius: 10,
   },
   noImageText: {
     color: '#999',
@@ -310,6 +306,7 @@ const styles = StyleSheet.create({
   },
   productInfoContainer: {
     paddingHorizontal: 10,
+    
   },
   productName: {
     fontSize: 14,
@@ -343,10 +340,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-   priceContainer: {
+  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 20,
   },
   originalPrice: {
     fontSize: 12,
@@ -357,6 +354,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: 'row',
     marginTop: 6,
+    marginBottom: 6
   },
   tag: {
     backgroundColor: '#f0f0f0',
@@ -370,30 +368,30 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   userInfoContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 10,
-backgroundColor: '#FF6B00',
-  borderBottomWidth: 1,
-  borderColor: '#ddd',
-},
-avatarWrapper: {
-  marginRight: 10,
-},
-avatarImage: {
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-},
-userName: {
-  fontSize: 24,
-  fontWeight: 'bold',
-  color:'white',
-},
-userEmail: {
-  fontSize: 12,
- color:'white',
-},
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#FF6B00',
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  avatarWrapper: {
+    marginRight: 10,
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  userEmail: {
+    fontSize: 12,
+    color: 'white',
+  },
 });
 
 export default HomeScreen;

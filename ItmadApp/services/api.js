@@ -20,4 +20,18 @@ export const createOrder = async (orderData) => {
   }
 };
 
+export const fetchRelatedProducts = async (categoryId, excludeProductId) => {
+  try {
+    const response = await api.get(`/product/related/${categoryId}/${excludeProductId}`);
+    
+    return response.data;
+    
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
 export default api;

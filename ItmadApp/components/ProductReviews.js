@@ -158,7 +158,7 @@ return (
           editable={!isSubmitting}
         />
 
-        {/* <Text style={styles.inputLabel}>Your Rating</Text>
+        <Text style={styles.inputLabel}>Your Rating</Text>
         <View style={styles.ratingContainer}>
           {[1, 2, 3, 4, 5].map((star) => (
             <TouchableOpacity
@@ -175,7 +175,7 @@ return (
               />
             </TouchableOpacity>
           ))}
-        </View> */}
+        </View>
 
         <TouchableOpacity
           style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}

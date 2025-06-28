@@ -127,25 +127,25 @@ const ChatScreen = ({ route }) => {
         console.log('📲 OneSignal ID fetched from Firestore:', oneSignalId);
         const res = await fetch('https://onesignal.com/api/v1/notifications', {
           method: 'POST',
-         headers: {
-  'Content-Type': 'application/json',
-  Authorization: 'Bearer os_v2_app_j5sccw3bpnh6zjirf5vsujobec4dwiw5kuquruua7bt5lvwmuxie6spexvj66yp4fi5l5lpvej5lpghoretcnsianjpbp42wszt2jai'
-},
-        body: JSON.stringify({
-  app_id: '4f64215b-617b-4fec-a511-2f6b2a25c120',
-  include_player_ids: [oneSignalId],
-  headings: { en: 'Message from Admin' },
-  contents: { en: messageText },
-  data: {
-    chatId: chatId,
-    userId: userId,
-    title: title,
-    image: image,
-    price: price.toString(),
-    shipping: shipping,
-    username: username
-  }
-}),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer os_v2_app_j5sccw3bpnh6zjirf5vsujobec4dwiw5kuquruua7bt5lvwmuxie6spexvj66yp4fi5l5lpvej5lpghoretcnsianjpbp42wszt2jai'
+          },
+          body: JSON.stringify({
+            app_id: '4f64215b-617b-4fec-a511-2f6b2a25c120',
+            include_player_ids: [oneSignalId],
+            headings: { en: 'Message from Admin' },
+            contents: { en: messageText },
+            data: {
+              chatId: chatId,
+              userId: userId,
+              title: title,
+              image: image,
+              price: price.toString(),
+              shipping: shipping,
+              username: username
+            }
+          }),
 
         });
 
