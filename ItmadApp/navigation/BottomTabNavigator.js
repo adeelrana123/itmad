@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
 import AccountScreen from '../screens/AccountScreen';
 import OrderListScreen from '../screens/OrderListScreen';
+import CartScreen from '../screens/CartScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,8 +28,8 @@ const BottomTabNavigator = () => {
             case 'Message':
               iconName = 'chatbubble-ellipses-outline';
               break;
-            case 'Search':
-              iconName = 'search-outline';
+            case 'Cart':
+               iconName = 'cart-outline';
               break;
             case 'My Orders':
               iconName = 'cart-outline';
@@ -46,7 +47,7 @@ const BottomTabNavigator = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Message" component={MessageScreen} />
-      {/* <Tab.Screen name="Search" component={SearchScreen} /> */}
+      <Tab.Screen name="Cart" component={CartScreen} />
       <Tab.Screen name="My Orders" component={OrderListScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>

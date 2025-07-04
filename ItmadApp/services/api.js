@@ -32,6 +32,78 @@ export const fetchRelatedProducts = async (categoryId, excludeProductId) => {
   }
 };
 
+export const fetchbanner = async () => {
+  try {
+    const response = await api.get(`/banner/all`);
+    // console.log('banner=>',response.data);
+   
+    return response.data;
+    
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+export const fetchbrands = async () => {
+  try {
+    const response = await api.get(`/brand/get-all`);
+    // console.log('brand=>',response.data);
+    return response.data;
+    
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+export const fetchbrandproduct = async (brand) => {
+  try {
+    const response = await api.get(`/search/filter/${brand}`);
+    // console.log('brand=>',response.data);
+    return response.data;
+    
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+export const fetchProductsByCategory = async (categoryName) => {
+  try {
+    // console.log("API request categoryName:", categoryName);
+    const response = await api.get(`/search/filter/category`, {
+      params: { categoryName },
+    });
+    console.log('API FULL Response:', response.data);
+
+    return response.data; 
+  } catch (error) {
+    console.log('❌ API Error (category):', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+
+
+export const fetchProductsByslug = async (slug) => {
+  try {
+    const response = await api.get(`/product/${slug}`);
+
+    if (response.data.product) {
+      return response.data.product;
+    }
+
+    return response.data;
+  } catch (error) {
+    console.log('❌ API Error (slug):', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+
+
 
 
 export default api;

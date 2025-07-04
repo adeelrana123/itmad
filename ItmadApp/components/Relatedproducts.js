@@ -12,7 +12,7 @@ import { fetchRelatedProducts } from '../services/api';
 import { useNavigation } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 40) / 2;
+const cardWidth = (screenWidth - 30) / 2;
 
 const RelatedProductsList = ({ categoryId, excludeProductId }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -49,18 +49,18 @@ const RelatedProductsList = ({ categoryId, excludeProductId }) => {
           </View>
         )}
 
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
           {item.title}
         </Text>
 
         <View style={styles.priceContainer}>
           {item.salePrice ? (
             <>
-              <Text style={styles.originalPrice}>{item.price} PKR</Text>
-              <Text style={styles.salePrice}>{item.salePrice} PKR</Text>
+              <Text style={styles.originalPrice}>Rs.{item.price}</Text>
+              <Text style={styles.salePrice}> Rs.{item.salePrice}</Text>
             </>
           ) : (
-            <Text style={styles.salePrice}>{item.price} PKR</Text>
+            <Text style={styles.salePrice}>Rs.{item.price}</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -81,39 +81,46 @@ const RelatedProductsList = ({ categoryId, excludeProductId }) => {
 
 const styles = StyleSheet.create({
   listContainer: {
-    paddingHorizontal: 10,
     paddingTop: 10,
-    paddingBottom: 30,
+    width: '100%',
+   
   },
   row: {
     justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: 10,
+   
+    
   },
   card: {
     width: cardWidth,
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 10,
+    
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
     position: 'relative',
+ width: cardWidth - 10,
   },
   image: {
     width: '100%',
-    height: 120,
+    height: 150,
     borderRadius: 8,
-    marginBottom: 8,
+    
   },
   title: {
     fontWeight: 'bold',
     fontSize: 14,
     color: '#333',
-    marginBottom: 4,
+   
+    paddingHorizontal:5
   },
   priceContainer: {
-    marginTop: 2,
+   
+    flexDirection: 'row',
+     paddingHorizontal:5,
+    alignItems: 'center',
   },
   salePrice: {
     color: '#FF6B00',
@@ -128,8 +135,8 @@ const styles = StyleSheet.create({
   },
   discountBox: {
     position: 'absolute',
-    top: 1,
-    right: 10,
+    top: 0,
+    right: 0,
     backgroundColor: '#FF6B00',
     paddingVertical: 4,
     paddingHorizontal: 6,

@@ -13,9 +13,11 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchAllProducts } from '../services/api';
+import { fetchAllProducts, fetchbanner } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BannerListScreen from '../components/BannerListScreen';
+import BrandsList from '../components/BrandsList';
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +43,7 @@ const HomeScreen = () => {
     fetchUserInfo();
   }, []);
   useEffect(() => {
+    
     fetchAllProducts(1, 50)
       .then(res => {
         let all = res.data.products;
@@ -91,24 +94,30 @@ const HomeScreen = () => {
   const renderProductCard = ({ item }) => (
     <TouchableOpacity
       style={styles.productCard}
+ onPress={() => {
+      // console.log('Navigating with slug:', item.slug); 
 
-      onPress={() => navigation.navigate('Detail', {
+      navigation.navigate('Detail', {
+        
         product: {
           ...item,
           userId: item.creator || 'fallback-id',
         },
-      })}
-      activeOpacity={0.8}
-    >
+        slug: item.slug,
+      });
+    }}
+    activeOpacity={0.8}
+  >
       <View style={styles.imageContainer}>
         {renderProductImage(item)}
       </View>
       <View style={styles.productInfoContainer}>
         <View style={styles.priceContainer}>
-          <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
-          {item.price > item.salePrice && (
+           {item.price > item.salePrice && (
             <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-          )}
+          )} 
+          <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
+         
         </View>
         <Text style={styles.productName} numberOfLines={1} ellipsizeMode="tail">
           {item.title}
@@ -116,15 +125,6 @@ const HomeScreen = () => {
         <Text style={styles.productCategory} numberOfLines={1} ellipsizeMode="tail">
           {item.category?.name}
         </Text>
-        {item.tags?.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.slice(0, 2).map(tag => (
-              <View key={tag._id} style={styles.tag}>
-                <Text style={styles.tagText}>{tag.name}</Text>
-              </View>
-            ))}
-          </View>
-        )}
       </View>
     </TouchableOpacity>
   );
@@ -165,9 +165,19 @@ const HomeScreen = () => {
           <Icon name="search" size={20} color="white" />
         </TouchableOpacity>
       </View>
+<ScrollView>
+
+
+<View style={{ height:100, }}>
+  <BannerListScreen />
+</View>
+
+<View style={{ height:120 }}>
+  <BrandsList />
+</View>
       {/* Flash Sale Title */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Flash Sale</Text>
+        <Text style={styles.sectionTitle}>Best Sellers</Text>
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
@@ -187,6 +197,7 @@ const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
+      </ScrollView>
     </View>
   );
 };
@@ -250,7 +261,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFB727'
   },
   gridContainer: {
     paddingHorizontal: 10,
@@ -283,13 +294,15 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   productImage: {
-    width: '95%',
-    height: 180,
-    marginTop: 2,
+    width: '100%',
+    height: 200,
+    // marginTop: 2,
     margin: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
+    // borderRadius: 10,
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10
   },
   noImageContainer: {
     width: '95%',
@@ -306,12 +319,14 @@ const styles = StyleSheet.create({
   },
   productInfoContainer: {
     paddingHorizontal: 10,
+    // paddingVertical: 10,
+    marginTop:15
     
   },
   productName: {
     fontSize: 14,
     fontWeight: '700',
-    marginBottom: 4,
+    // marginBottom: 4,
     color: '#333',
   },
   productCategory: {
@@ -323,7 +338,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontWeight: 'bold',
     color: '#e53935',
-    fontSize: 16,
+    fontSize: 18,
   },
   noDataContainer: {
     flex: 1,
@@ -346,10 +361,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   originalPrice: {
-    fontSize: 12,
+    fontSize: 16,
     color: '#888',
     textDecorationLine: 'line-through',
-    marginLeft: 8,
+    // marginLeft: 8,
   },
   tagsContainer: {
     flexDirection: 'row',
