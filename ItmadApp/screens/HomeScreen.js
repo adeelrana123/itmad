@@ -1,5 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -7,24 +6,30 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  FlatList,
   Image,
-  Dimensions,
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchAllProducts, fetchbanner } from '../services/api';
+import { fetchAllProducts } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BannerListScreen from '../components/BannerListScreen';
 import BrandsList from '../components/BrandsList';
+import TrendingProductsPaginated from '../components/TrendingProducts';
+import NewArrivals from '../components/NewArrivals';
+import AllCategories from '../components/AllCategories';
+import BestSellers from '../components/BestSellers';
+import { useAppTheme } from '../theme/ThemeContext';
+import Wattsup from '../components/Wattsup';
+
 const HomeScreen = () => {
-  const navigation = useNavigation();
+  const theme = useAppTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [avatar, setAvatar] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -39,23 +44,21 @@ const HomeScreen = () => {
         setUser(null);
       }
     };
-
     fetchUserInfo();
   }, []);
+
   useEffect(() => {
-    
+    setLoading(true);
     fetchAllProducts(1, 50)
       .then(res => {
         let all = res.data.products;
         if (searchQuery) {
           all = all.filter(item =>
-            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) || // Added name search
+            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
           );
         }
-        // console.log('Fetched product sample:', res.data.products[0]);
-
         setFilteredProducts(all);
         setLoading(false);
       })
@@ -66,68 +69,74 @@ const HomeScreen = () => {
   }, [searchQuery]);
 
   const handleSearch = () => {
-    setSearchQuery(searchQuery.trim());
+    const trimmed = searchQuery.trim();
+    setSearchQuery(trimmed);
+    setHasSearched(!!trimmed);
   };
 
-  const renderProductImage = (item) => {
-    const imageUri = item.variants?.[0]?.values?.[0]?.image ||
-      (item.images && item.images[0]);
-
-    if (!imageUri) {
-      return (
-        <View style={styles.noImageContainer}>
-          <Text style={styles.noImageText}>No Image</Text>
-        </View>
-      );
-    }
-
-    return (
-      <Image
-        source={{ uri: imageUri }}
-        style={styles.productImage}
-        resizeMode="cover"
-        onError={() => console.log('Image failed to load')}
-      />
-    );
-  };
-
-  const renderProductCard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productCard}
- onPress={() => {
-      // console.log('Navigating with slug:', item.slug); 
-
-      navigation.navigate('Detail', {
-        
-        product: {
-          ...item,
-          userId: item.creator || 'fallback-id',
+  const styles = useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
+    searchContainer: {
+      flexDirection: 'row',
+      padding: 10,
+      alignItems: 'center',
+      position: 'relative',
+      backgroundColor: '#fff',
+      zIndex: 1,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
-        slug: item.slug,
-      });
-    }}
-    activeOpacity={0.8}
-  >
-      <View style={styles.imageContainer}>
-        {renderProductImage(item)}
-      </View>
-      <View style={styles.productInfoContainer}>
-        <View style={styles.priceContainer}>
-           {item.price > item.salePrice && (
-            <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-          )} 
-          <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
-         
-        </View>
-        <Text style={styles.productName} numberOfLines={1} ellipsizeMode="tail">
-          {item.title}
-        </Text>
-        <Text style={styles.productCategory} numberOfLines={1} ellipsizeMode="tail">
-          {item.category?.name}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+        android: { elevation: 2 },
+      }),
+    },
+    searchInput: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      padding: 10,
+      paddingRight: 50,
+      borderRadius: 8,
+      backgroundColor: '#f9f9f9',
+      fontSize: 16,
+      ...Platform.select({ android: { paddingVertical: 8 } }),
+    },
+    searchIconButton: {
+      position: 'absolute',
+      right: 10,
+      padding: 10,
+      backgroundColor: 'orange',
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    userInfoContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 10,
+      backgroundColor: '#FF6B00',
+      borderBottomWidth: 1,
+      borderColor: theme.borderColor,
+    },
+    avatarWrapper: { marginRight: 10 },
+    avatarImage: { width: 60, height: 60, borderRadius: 30 },
+    userName: { fontSize: 24, fontWeight: 'bold', color: theme.white },
+    userEmail: { fontSize: 12, color: theme.white },
+    wattsupButtonWrapper: {
+      position: 'absolute',
+      bottom: 20,
+      right: 20,
+      zIndex: 10,
+    },
+    logo: {
+  width: 60,
+  height: 40,
+  marginRight: 10,
+},
+  }), [theme]);
 
   return (
     <View style={styles.container}>
@@ -146,14 +155,23 @@ const HomeScreen = () => {
           </View>
         </View>
       )}
+
       <View style={styles.searchContainer}>
+        <Image
+    source={require('../assets/etimad.png')}
+    style={styles.logo}
+    // resizeMode="contain"
+  />
         <TextInput
           placeholder="Search for products..."
           value={searchQuery}
-          onChangeText={text => setSearchQuery(text)}
+         onChangeText={text => {
+  setSearchQuery(text);
+  setHasSearched(!!text.trim());
+}}
           style={styles.searchInput}
           onSubmitEditing={handleSearch}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.placeholderText}
           clearButtonMode="while-editing"
           underlineColorAndroid="transparent"
         />
@@ -165,248 +183,47 @@ const HomeScreen = () => {
           <Icon name="search" size={20} color="white" />
         </TouchableOpacity>
       </View>
-<ScrollView>
 
+      <ScrollView>
+        <View style={{ height: 100 }}>
+          <BannerListScreen />
+        </View>
+        <View style={{ height: 240 }}>
+          <AllCategories />
+        </View>
+        <View style={{ height: 120 }}>
+          <BrandsList />
+        </View>
 
-<View style={{ height:100, }}>
-  <BannerListScreen />
-</View>
+       {searchQuery ? (
+  loading ? (
+    <ActivityIndicator size="large" color="orange" style={{ marginVertical: 20 }} />
+  ) : filteredProducts.length > 0 ? (
+    <BestSellers products={filteredProducts} loading={loading} />
+  ) : (
+    <View style={{ padding: 20, alignItems: 'center' }}>
+      <Text style={{ fontSize: 16, color: '#888' }}>No products found.</Text>
+    </View>
+  )
+) : (
+  <>
+    <View style={{ height: 240 }}>
+      <TrendingProductsPaginated />
+    </View>
+    <View style={{ height: 240 }}>
+      <NewArrivals />
+    </View>
+    <BestSellers products={filteredProducts} loading={loading} />
+  </>
+)}
 
-<View style={{ height:120 }}>
-  <BrandsList />
-</View>
-      {/* Flash Sale Title */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Best Sellers</Text>
-      </View>
-      {loading ? (
-        <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
-      ) : (
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={item => item._id}
-          numColumns={2}
-          contentContainerStyle={styles.gridContainer}
-          columnWrapperStyle={styles.columnWrapper}
-          renderItem={renderProductCard}
-          ListEmptyComponent={
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No products found</Text>
-            </View>
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      )}
       </ScrollView>
+
+      <View style={styles.wattsupButtonWrapper}>
+        <Wattsup />
+      </View>
     </View>
   );
 };
-const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 30) / 2;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    alignItems: 'center',
-    position: 'relative',
-    backgroundColor: '#fff',
-    zIndex: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    paddingRight: 50,
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    fontSize: 16,
-    ...Platform.select({
-      android: {
-        paddingVertical: 8,
-      },
-    }),
-  },
-  searchIconButton: {
-    position: 'absolute',
-    right: 10,
-    padding: 10,
-    backgroundColor: 'orange',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFB727'
-  },
-  gridContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 20,
-
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    
-  },
-  productCard: {
-    width: cardWidth,
-    backgroundColor: '#fff',
-    marginBottom: 10,
-    borderRadius: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  imageContainer: {
-    width: '100%',
-    aspectRatio: 1,
-  },
-  productImage: {
-    width: '100%',
-    height: 200,
-    // marginTop: 2,
-    margin: 'auto',
-    justifyContent: 'center',
-    alignItems: 'center',
-    // borderRadius: 10,
-    borderTopLeftRadius:10,
-    borderTopRightRadius:10
-  },
-  noImageContainer: {
-    width: '95%',
-     height: 180,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  noImageText: {
-    color: '#999',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  productInfoContainer: {
-    paddingHorizontal: 10,
-    // paddingVertical: 10,
-    marginTop:15
-    
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: '700',
-    // marginBottom: 4,
-    color: '#333',
-  },
-  productCategory: {
-    fontSize: 12,
-    marginBottom: 4,
-    fontWeight: '500',
-    color: '#666',
-  },
-  productPrice: {
-    fontWeight: 'bold',
-    color: '#e53935',
-    fontSize: 18,
-  },
-  noDataContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  noDataText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  loadingIndicator: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  originalPrice: {
-    fontSize: 16,
-    color: '#888',
-    textDecorationLine: 'line-through',
-    // marginLeft: 8,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    marginTop: 6,
-    marginBottom: 6
-  },
-  tag: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginRight: 4,
-  },
-  tagText: {
-    fontSize: 10,
-    color: '#666',
-  },
-  userInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#FF6B00',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
-  avatarWrapper: {
-    marginRight: 10,
-  },
-  avatarImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  userEmail: {
-    fontSize: 12,
-    color: 'white',
-  },
-});
 
 export default HomeScreen;

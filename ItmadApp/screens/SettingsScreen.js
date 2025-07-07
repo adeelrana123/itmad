@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import Header from '../components/Header';
-import useAppTheme from '../theme/useAppTheme';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useAppTheme } from '../theme/ThemeContext';
 const SettingsScreen = () => {
   const colors = useAppTheme();
   const [darkMode, setDarkMode] = React.useState(false);
@@ -49,28 +49,28 @@ const SettingsScreen = () => {
   <Text style={styles.value}>English </Text>
 </View>
 
-<TouchableOpacity style={styles.row}>
+<View style={styles.row}>
   <View style={styles.rowLeft}>
     <Icon name="lock-closed-outline" size={20} color="#444" style={styles.icon} />
     <Text style={styles.label}>Change Password</Text>
   </View>
   <Text style={styles.value}>></Text>
-</TouchableOpacity>
-<TouchableOpacity style={styles.row}>
+</View>
+<View style={styles.row}>
   <View style={styles.rowLeft}>
     <Icon name="shield-checkmark-outline" size={20} color="#444" style={styles.icon} />
     <Text style={styles.label}>Privacy Policy</Text>
   </View>
   <Text style={styles.value}>></Text>
-</TouchableOpacity>
+ </View>
 
-<TouchableOpacity style={styles.row}>
+<View style={styles.row}>
   <View style={styles.rowLeft}>
     <Icon name="document-text-outline" size={20} color="#444" style={styles.icon} />
     <Text style={styles.label}>Terms of Service</Text>
   </View>
   <Text style={styles.value}>></Text>
-</TouchableOpacity>
+ </View>
 
       
         

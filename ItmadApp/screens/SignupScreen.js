@@ -11,7 +11,8 @@ import {
 import { signup } from '../services/authApi';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
-import useAppTheme from '../theme/useAppTheme';
+import { useAppTheme } from '../theme/ThemeContext';
+// import useAppTheme from '../theme/useAppTheme';
 
 const SignupScreen = () => {
   const navigation = useNavigation();

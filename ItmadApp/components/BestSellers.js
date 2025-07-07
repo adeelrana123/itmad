@@ -1,0 +1,201 @@
+// components/BestSellers.js
+import React from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = (screenWidth - 30) / 2;
+
+const BestSellers = ({ products, loading }) => {
+  const navigation = useNavigation();
+
+  const renderProductImage = (item) => {
+    const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
+
+    if (!imageUri) {
+      return (
+        <View style={styles.noImageContainer}>
+          <Text style={styles.noImageText}>No Image</Text>
+        </View>
+      );
+    }
+
+    return (
+      <Image
+        source={{ uri: imageUri }}
+        style={styles.productImage}
+        resizeMode="cover"
+      />
+    );
+  };
+
+  const renderProductCard = ({ item }) => (
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={() =>
+        navigation.navigate('Detail', {
+          product: {
+            ...item,
+            userId: item.creator || 'fallback-id',
+          },
+          slug: item.slug,
+        })
+      }
+      activeOpacity={0.8}
+    >
+      <View style={styles.imageContainer}>{renderProductImage(item)}</View>
+      <View style={styles.productInfoContainer}>
+        <View style={styles.priceContainer}>
+          {item.price > item.salePrice && (
+            <Text style={styles.originalPrice}>Rs. {item.price}</Text>
+          )}
+          <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
+        </View>
+        <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Best Sellers</Text>
+      </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
+      ) : (
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item._id}
+          numColumns={2}
+          contentContainerStyle={styles.gridContainer}
+          columnWrapperStyle={styles.columnWrapper}
+          renderItem={renderProductCard}
+          ListEmptyComponent={
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No products found</Text>
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFB727',
+  },
+  gridContainer: {
+    paddingHorizontal: 10,
+    paddingBottom: 20,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  productCard: {
+    width: cardWidth,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+    borderRadius: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  productImage: {
+    width: '100%',
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  noImageContainer: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  noImageText: {
+    color: '#999',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  productInfoContainer: {
+    paddingHorizontal: 10,
+    marginTop: 15,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
+  },
+  productCategory: {
+    fontSize: 12,
+    marginBottom: 4,
+    fontWeight: '500',
+    color: '#666',
+  },
+  productPrice: {
+    fontWeight: 'bold',
+    color: '#e53935',
+    fontSize: 18,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  originalPrice: {
+    fontSize: 16,
+    color: '#888',
+    textDecorationLine: 'line-through',
+  },
+  noDataContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noDataText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  loadingIndicator: {
+    marginVertical: 20,
+  },
+});
+
+export default BestSellers;

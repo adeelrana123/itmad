@@ -11,7 +11,7 @@ import { login } from '../services/authApi';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
-import useAppTheme from '../theme/useAppTheme';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const LoginScreen = () => {
   const navigation = useNavigation();

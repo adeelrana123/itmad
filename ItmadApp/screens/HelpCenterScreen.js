@@ -11,10 +11,13 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
+import { useAppTheme } from '../theme/ThemeContext';
+
 
 const HelpCenterScreen = () => {
   const navigation = useNavigation();
   const [checkingLogin, setCheckingLogin] = useState(true);
+  const theme = useAppTheme();
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -38,31 +41,31 @@ const HelpCenterScreen = () => {
 
   if (checkingLogin) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#FF6B00" />
+      <View style={styles(theme).loader}>
+        <ActivityIndicator size="large" color={theme.buttonBackground} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <Header title="Help Center" />
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>Welcome to Help Center</Text>
-        <Text style={styles.paragraph}>
+      <ScrollView contentContainerStyle={styles(theme).container}>
+        <Text style={styles(theme).heading}>Welcome to Help Center</Text>
+        <Text style={styles(theme).paragraph}>
           If you have any issues with your orders, payments, or account, you can contact us through the following methods:
         </Text>
 
         <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles.linkItem}>📧 Email: support@etimadmart.com</Text>
+          <Text style={styles(theme).linkItem}>📧 Email: support@etimadmart.com</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handlePhonePress}>
-          <Text style={styles.linkItem}>📞 Phone: 0308 5782560</Text>
+          <Text style={styles(theme).linkItem}>📞 Phone: 0308 5782560</Text>
         </TouchableOpacity>
 
-        <Text style={styles.item}>⏰ Support Hours: 9 AM – 6 PM (Mon – Sat)</Text>
-        <Text style={styles.paragraph}>
+        <Text style={styles(theme).item}>⏰ Support Hours: 9 AM – 6 PM (Mon – Sat)</Text>
+        <Text style={styles(theme).paragraph}>
           For common questions, visit our FAQ section in the app or website.
         </Text>
       </ScrollView>
@@ -72,33 +75,34 @@ const HelpCenterScreen = () => {
 
 export default HelpCenterScreen;
 
-const styles = StyleSheet.create({
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: {
-    padding: 20,
-    backgroundColor: '#f9f9f9',
-  },
-  heading: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-  paragraph: {
-    fontSize: 16,
-    color: '#444',
-    marginBottom: 15,
-    lineHeight: 22,
-  },
-  item: {
-    fontSize: 16,
-    color: '#000',
-    marginBottom: 10,
-  },
-  linkItem: {
-    fontSize: 16,
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-    marginBottom: 10,
-  },
-});
+const styles = (theme) =>
+  StyleSheet.create({
+    loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    container: {
+      padding: 20,
+      backgroundColor: theme.background,
+    },
+    heading: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginBottom: 15,
+      color: theme.text,
+    },
+    paragraph: {
+      fontSize: 16,
+      color: theme.mutedText,
+      marginBottom: 15,
+      lineHeight: 22,
+    },
+    item: {
+      fontSize: 16,
+      color: theme.text,
+      marginBottom: 10,
+    },
+    linkItem: {
+      fontSize: 16,
+      color: theme.blue,
+      textDecorationLine: 'underline',
+      marginBottom: 10,
+    },
+  });

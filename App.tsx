@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
-import { store } from './ItmadApp/redux/store';
+import { persistor, store } from './ItmadApp/redux/store';
 import AppNavigator from './ItmadApp/navigation/AppNavigator';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigate, navigationRef } from './ItmadApp/navigation/RootNavigation';
 import { LogLevel, OneSignal } from 'react-native-onesignal';
+import { ThemeProvider } from './ItmadApp/theme/ThemeContext';
+import { PersistGate } from 'redux-persist/integration/react';
+
 const App = () => {
   OneSignal.Debug.setLogLevel(LogLevel.Verbose);
   // Initialize with your OneSignal App ID
@@ -60,13 +63,17 @@ useEffect(() => {
 
   checkStatus();
 }, []);
-  return (
+ return (
+  <ThemeProvider>
     <Provider store={store}>
-      <NavigationContainer ref={navigationRef}>
-        <AppNavigator />
-      </NavigationContainer>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer ref={navigationRef}>
+          <AppNavigator />
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
-  );
+  </ThemeProvider>
+);
 };
 
 export default App;

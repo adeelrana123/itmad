@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import useAppTheme from '../theme/useAppTheme';
+import { useAppTheme } from '../theme/ThemeContext';
+// import useAppTheme from '../theme/useAppTheme';
 
 const Header = ({ title }) => {
   const navigation = useNavigation();

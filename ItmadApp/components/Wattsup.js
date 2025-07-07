@@ -8,11 +8,9 @@ import {
   Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import Header from '../components/Header';
+import { useNavigation } from '@react-navigation/native'
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-const MessageScreen = () => {
+const Wattsup = () => {
   const navigation = useNavigation();
   const [checkingLogin, setCheckingLogin] = useState(true);
 
@@ -44,45 +42,36 @@ const MessageScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header title="Message Screen" />
       <View style={styles.container}>
         <TouchableOpacity style={styles.whatsappButton} onPress={openWhatsApp}>
-          <Icon name="whatsapp" size={24} color="#fff" />
-          <Text style={styles.whatsappText}>Chat on WhatsApp</Text>
+          <Icon name="whatsapp" size={30} color="#fff" />
+          
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-export default MessageScreen;
+export default Wattsup;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2e7d32',
-    marginBottom: 20,
-  },
-  whatsappButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#25D366',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  whatsappText: {
-    color: '#fff',
-    fontSize: 16,
-    marginLeft: 10,
-    fontWeight: '600',
-  },
+ wattsupButtonWrapper: {
+  position: 'absolute',
+  bottom: 20,
+  right: 20,
+  zIndex: 10,
+},
+ whatsappButton: {
+  width: 50,
+  height: 50,
+  borderRadius: 25, 
+  backgroundColor: '#25D366',
+  justifyContent: 'center',
+  alignItems: 'center',
+  elevation: 5, 
+  shadowColor: '#000', 
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+},
 });

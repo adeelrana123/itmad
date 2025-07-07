@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux';
 import { addToCart, clearCart } from '../redux/cartSlice';
 import { useNavigation } from '@react-navigation/native';
-import RenderHTML from 'react-native-render-html';
 import { useWindowDimensions } from 'react-native';
 import RelatedButton from '../components/Relatedproducts';
 import ProductReviews from '../components/ProductReviews';
@@ -290,7 +289,9 @@ const DetailScreen = ({ route }) => {
 
       <View style={styles.fixedBottomContainer}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('MainTabs', { screen: 'Cart' })}
+          onPress={
+            () =>{ dispatch(addToCart(cartPayload));
+               navigation.navigate('MainTabs', { screen: 'Cart' })}}
           style={styles.reviewButtonBottom}
         >
           <Ionicons name="cart-outline" size={16} color="#fff" />
@@ -307,7 +308,7 @@ const DetailScreen = ({ route }) => {
 
         <TouchableOpacity
           onPress={() => {
-            dispatch(clearCart());
+            // dispatch(clearCart());
             dispatch(addToCart(cartPayload));
             navigation.navigate('CartScreens');
           }}

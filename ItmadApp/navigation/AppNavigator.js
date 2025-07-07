@@ -13,7 +13,6 @@ import CartScreens from '../components/CartScreens';
 import OrderListScreen from '../screens/OrderListScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AboutUsScreen from '../screens/AboutUsScreen';
-import MessageScreen from '../screens/MessageScreen';
 import HelpCenterScreen from '../screens/HelpCenterScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProductReviews from '../components/ProductReviews';
@@ -21,6 +20,7 @@ import AdminChatListScreen from '../screens/AdminChatListScreen';
 import BannerListScreen from '../components/BannerListScreen';
 import BrandProductsScreen from '../screens/BrandProductsScreen';
 import CategoryScreen from '../screens/CategoryScreen';
+import CategoryProductsScreen from '../screens/CategoryProductsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,7 +37,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Detail" component={DetailScreen} />
         <Stack.Screen name="CartScreens" component={CartScreens} />
 <Stack.Screen name="Orders" component={OrderListScreen} />
-     <Stack.Screen name="My Messages" component={MessageScreen} />
+     {/* <Stack.Screen name="My Messages" component={MessageScreen} /> */}
      <Stack.Screen name="Help Center" component={HelpCenterScreen} />
           <Stack.Screen name="ChatScreen" component={ChatScreen} />
            <Stack.Screen name="ProductReviews" component={ProductReviews} />
@@ -45,6 +45,8 @@ const AppNavigator = () => {
            <Stack.Screen name="BannerListScreen" component={BannerListScreen} />
            <Stack.Screen name="BrandProducts" component={BrandProductsScreen} />
            <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
+           <Stack.Screen name="CategoryProductsScreen" component={CategoryProductsScreen} />
+       
 
     </Stack.Navigator>
   );

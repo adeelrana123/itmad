@@ -35,13 +35,7 @@ const navigation = useNavigation();
     loadBrands();
   }, []);
 
-  if (loading && brands.length === 0) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="orange" />
-      </View>
-    );
-  }
+  
 
   return (   
 
@@ -50,7 +44,9 @@ const navigation = useNavigation();
             <Text style={styles.sectionTitle}>Top Brands</Text>
           </View>
    
-
+{loading ? (
+        <ActivityIndicator size="small" color="orange" />
+      ) : (
 
     <FlatList
       data={brands}
@@ -67,7 +63,8 @@ const navigation = useNavigation();
           <Text style={styles.brandName}>{item.name}</Text>
         </TouchableOpacity>
       )}
-    />
+    /> )
+}
     </View>
   );
 };
@@ -82,7 +79,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-   color: '#FFB727'
+    color: '#FF9800',
   },
   loaderContainer: {
     // paddingVertical: 10,

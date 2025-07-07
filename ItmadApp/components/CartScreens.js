@@ -44,11 +44,17 @@ const navigation = useNavigation();
     setCustomerInfo(prev => ({ ...prev, [key]: value }));
   };
 
-  const grandTotal = cartItems.reduce((acc, item) => {
-    const price = item.salePrice * item.quantity;
-    const shipping = item.deliveryCharges || 0;
-    return acc + price + shipping;
-  }, 0);
+  const subtotal = cartItems.reduce(
+  (acc, item) => acc + item.salePrice * item.quantity,
+  0
+);
+
+const hasShipping = cartItems.some(
+  item => !item.freeShipping && item.deliveryCharges > 0
+);
+
+const grandTotal = hasShipping ? subtotal + 200 : subtotal;
+
 
   const handleSubmitOrder = async () => {
     if (cartItems.length === 0) {
@@ -171,12 +177,10 @@ console.log("✅ Order response:", response.data);
                       )}
                     </View>
 
-                    <View style={styles.shippingDeleteRow}>
+                    {/* <View style={styles.shippingDeleteRow}>
                       <Text style={styles.total}>Total: Rs. {totalPrice}</Text>
-                      {/* <TouchableOpacity onPress={() => dispatch(removeFromCart(item.id))}>
-                        <Icon name="trash" size={18} color="red" />
-                      </TouchableOpacity> */}
-                    </View>
+                      
+                    </View> */}
                   </View>
                 </View>
                 <Text style={styles.title}>{item.title}</Text>
