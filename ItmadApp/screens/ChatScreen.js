@@ -220,6 +220,7 @@ const ChatScreen = ({ route }) => {
             value={message}
             onChangeText={setMessage}
             multiline
+            placeholderTextColor={colors.placeholderText}
           />
           <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
             <Text style={{ color: 'white' }}>Send</Text>
@@ -233,6 +234,7 @@ const ChatScreen = ({ route }) => {
             value={adminMessage}
             onChangeText={setAdminMessage}
             multiline
+            placeholderTextColor={colors.placeholderText}
           />
           <TouchableOpacity style={styles.adminSendButton} onPress={handleAdminReply}>
             <Text style={{ color: 'white' }}>Send</Text>

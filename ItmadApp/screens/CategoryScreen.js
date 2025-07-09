@@ -22,9 +22,12 @@ import { fetchProductsByCategory } from '../services/api';
 const   CategoryScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const {categoryName,categoryId} = route.params;
+  const {categoryId, categorySlug, categoryName} = route.params;
 ;
-//    console.log("categoryName---->",categoryName)
+// console.log('Received route params:', route.params);
+// console.log('categoryId:', categoryId);
+// console.log('categorySlug:', categorySlug);
+// console.log('categoryName:', categoryName);
 const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
@@ -38,9 +41,11 @@ const [allProducts, setAllProducts] = useState([]);
     setError(null);
 
  
-  console.log('Fetching products by category:', { categoryName, categoryId });
+  // console.log('Fetching products by category:', { categoryName, categoryId });
   
 const data = await fetchProductsByCategory(categoryName);
+// const data = await fetchProductsByCategory(categorySlug);
+// console.log('fetchProductsByCategory response:', data);
 if (data.success) {
   setAllProducts(data.products); 
   setProducts(data.products);    
@@ -55,7 +60,9 @@ if (data.success) {
     setLoading(false);
   }
 };
-
+// useEffect(() => {
+//   fetchProducts();
+// }, [categoryId]);
 
   useEffect(() => {
     fetchProducts();

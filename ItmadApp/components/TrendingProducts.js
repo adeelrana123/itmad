@@ -74,23 +74,26 @@ const TrendingProducts = () => {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Trending Products</Text>
-      {loading ? (
-        <ActivityIndicator size="small" color="orange" />
-      ) : (
-        <FlatList
-          data={trending}
-          keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-        />
-      )}
-    </View>
-  );
+return (
+  <View style={styles.container}>
+    <Text style={styles.heading}>Trending Products</Text>
+    {loading ? (
+      <ActivityIndicator size="small" color="orange" />
+    ) : trending.length === 0 ? (
+      <Text style={styles.noDataText}>No Data Found</Text>
+    ) : (
+      <FlatList
+        data={trending}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+      />
+    )}
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -169,6 +172,13 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     marginRight: 5,
   },
+  noDataText: {
+  textAlign: 'center',
+  fontSize: 16,
+  color: '#888',
+  paddingVertical: 20,
+},
+
 });
 
 export default TrendingProducts;

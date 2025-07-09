@@ -111,7 +111,7 @@ const grandTotal = hasShipping ? subtotal + 200 : subtotal;
     try {
       console.log("🟢 Sending order...",orderPayload);
 const response = await createOrder(orderPayload);
-console.log("✅ Order response:", response.data);
+// console.log("✅ Order response:", response.data);
 
       Alert.alert('Success', 'Order submitted successfully!');
       dispatch(clearCart());
@@ -165,13 +165,13 @@ console.log("✅ Order response:", response.data);
                       {item.freeShipping || item.deliveryCharges === 0 ? (
                         <View style={styles.shippingRow}>
                           <Icon name="truck" size={16} color="green" style={styles.icon} />
-                          <Text style={styles.freeShipping}>Free Shipping</Text>
+                          <Text style={styles.freeShipping}>Free Delivery</Text>
                         </View>
                       ) : (
                         <View style={styles.shippingRow}>
                           <Icon name="truck" size={16} color="#FF6B00" style={styles.icon} />
                           <Text style={styles.shipping}>
-                            Shipping: Rs. {item.deliveryCharges}
+                            Delivery: Rs. {item.deliveryCharges}
                           </Text>
                         </View>
                       )}
@@ -191,7 +191,7 @@ console.log("✅ Order response:", response.data);
 
         {/* Shipping Address */}
         <View style={{ padding: 15 }}>
-          <Text style={styles.sectionTitle}>Shipping Address</Text>
+          <Text style={styles.sectionTitle}>Your Address</Text>
 
           <TextInput
             placeholder="First Name "

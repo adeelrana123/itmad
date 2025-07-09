@@ -31,21 +31,21 @@ const HomeScreen = () => {
   const [avatar, setAvatar] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      const name = await AsyncStorage.getItem('username');
-      const email = await AsyncStorage.getItem('email');
-      const avatarUri = await AsyncStorage.getItem('avatar');
+  // useEffect(() => {
+  //   const fetchUserInfo = async () => {
+  //     const name = await AsyncStorage.getItem('username');
+  //     const email = await AsyncStorage.getItem('email');
+  //     const avatarUri = await AsyncStorage.getItem('avatar');
 
-      if (name && email) {
-        setUser({ name, email });
-        setAvatar(avatarUri);
-      } else {
-        setUser(null);
-      }
-    };
-    fetchUserInfo();
-  }, []);
+  //     if (name && email) {
+  //       setUser({ name, email });
+  //       setAvatar(avatarUri);
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   };
+  //   fetchUserInfo();
+  // }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -122,7 +122,7 @@ const HomeScreen = () => {
       borderColor: theme.borderColor,
     },
     avatarWrapper: { marginRight: 10 },
-    avatarImage: { width: 60, height: 60, borderRadius: 30 },
+    avatarImage: { width: 60, height: 30, borderRadius:10 },
     userName: { fontSize: 24, fontWeight: 'bold', color: theme.white },
     userEmail: { fontSize: 12, color: theme.white },
     wattsupButtonWrapper: {
@@ -140,7 +140,7 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      {user && (
+      {/* {user && (
         <View style={styles.userInfoContainer}>
           <View style={styles.avatarWrapper}>
             {avatar ? (
@@ -154,20 +154,26 @@ const HomeScreen = () => {
             <Text style={styles.userEmail}>{user.email}</Text>
           </View>
         </View>
-      )}
+      )} */}
+
+       <View style={styles.userInfoContainer}>
+         <View style={styles.avatarWrapper}>
+  <Image source={require('../assets/etimad.png')} style={styles.avatarImage} />
+</View>
+
+          <View>
+            <Text style={styles.userName}>Welcome to Etimad Mart</Text>
+          </View>
+        </View>
 
       <View style={styles.searchContainer}>
-        <Image
-    source={require('../assets/etimad.png')}
-    style={styles.logo}
-    // resizeMode="contain"
-  />
         <TextInput
           placeholder="Search for products..."
           value={searchQuery}
          onChangeText={text => {
   setSearchQuery(text);
   setHasSearched(!!text.trim());
+  
 }}
           style={styles.searchInput}
           onSubmitEditing={handleSearch}

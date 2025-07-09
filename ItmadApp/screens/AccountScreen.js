@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  ActivityIndicator,
   Alert,
   Image,
 } from 'react-native';
@@ -16,8 +15,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { logout } from '../services/authApi';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-
-
 const AccountScreen = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,15 +135,9 @@ const pickImage = () => {
       Alert.alert('Logout failed', err.message);
     }
   };
-
-  const handlePress = async (screen) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      navigation.navigate(screen);
-    } else {
-      navigation.navigate('Login', { redirectTo: 'Account' });
-    }
-  };
+  const handlePress = (screen) => {
+  navigation.navigate(screen);
+};
 
   const menuItems = [
     { title: 'My Orders', icon: 'list-alt', action: 'Orders', rightText: 'View All Orders >' },
@@ -187,7 +178,7 @@ const pickImage = () => {
           </View>
         ) : (
           <View style={styles.authWrapper}>
-            <Text style={styles.headerText}>Hello, Welcome to Etimad!</Text>
+            <Text style={styles.headerText}>Welcome to Etimad Mart!</Text>
             <View style={styles.authButtons}>
               <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.buttonText}>Login</Text>
@@ -237,11 +228,6 @@ const pickImage = () => {
             </View>
           ))}
         </View>
-       {/* <TouchableOpacity 
-  style={styles.viewAllButton} 
-  onPress={() => navigation.navigate('AdminChats')}>
-  <Text style={styles.viewAllText}>View All Product Chats</Text>
-</TouchableOpacity> */}
       </View>
     </ScrollView>
   );

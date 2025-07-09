@@ -7,34 +7,22 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
 import Header from '../components/Header';
 import { useAppTheme } from '../theme/ThemeContext';
 
-
 const OrderListScreen = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
-  const isFocused = useIsFocused();
   const theme = useAppTheme();
 
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        navigation.replace('Login', { redirectTo: 'Orders' });
-        return;
-      }
 
       try {
-        const res = await axios.get('https://etimadmart.com/api/v1/order/userId', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // No token sent here
+        const res = await axios.get('https://etimadmart.com/api/v1/order/userId');
 
         const result = Array.isArray(res.data.orders)
           ? res.data.orders
@@ -50,10 +38,8 @@ const OrderListScreen = () => {
       }
     };
 
-    if (isFocused) {
-      fetchOrders();
-    }
-  }, [isFocused]);
+    fetchOrders();
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={[styles(theme).orderCard]}>
@@ -114,9 +100,12 @@ const OrderListScreen = () => {
             <ActivityIndicator size="large" color={theme.buttonBackground} />
           </View>
         ) : orders.length === 0 ? (
-          <Text style={{ textAlign: 'center', marginTop: 20, color: theme.text }}>
-            No orders found.
-          </Text>
+         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Text style={{ color: theme.text, textAlign: 'center' }}>
+    No orders found.
+  </Text>
+</View>
+
         ) : (
           <FlatList
             data={orders}

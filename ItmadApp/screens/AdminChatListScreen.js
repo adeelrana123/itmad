@@ -28,7 +28,7 @@ const AdminChatListScreen = () => {
           return {
             id: doc.id,
             title: data.title || data.product || doc.id,
-            userName: data.user || data.userName || 'User',
+            userName: data.user || data.userName || 'Unknown User',
             userImage: data.userImage || '',
             productImage: data.productImage || data.image || '',
             price: data.price ? `Rs. ${data.price}` : 'N/A',

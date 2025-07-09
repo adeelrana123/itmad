@@ -27,20 +27,37 @@ const NewArrivals = () => {
     loadNewArrivals();
   }, []);
 
+  const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')      // spaces to hyphens
+    .replace(/[^\w\-]+/g, '')  // remove non-word chars
+    .replace(/\-\-+/g, '-');   // collapse multiple hyphens
+};
+
   const renderItem = ({ item }) => {
     const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
 
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() =>
-          navigation.navigate('Detail', {
-            product: {
-              ...item,
-              userId: item.creator || 'fallback-id',
-            },
-          })
-        }
+       onPress={() => {
+ console.log('Navigating with category slug:', item.category?.slug || slugify(item.category?.name || ''));
+
+
+ navigation.navigate('Detail', {
+  product: {
+    ...item,
+    userId: item.creator || 'fallback-id',
+    slug: item.slug || '',
+   categoryName: item.category?.slug || slugify(item.category?.name || '')
+  },
+});
+
+}}
+
       >
         <Image source={{ uri: imageUri }} style={styles.image} />
        <View style={styles.productInfoContainer}>
@@ -57,23 +74,27 @@ const NewArrivals = () => {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>New Arrivals</Text>
-      {loading ? (
-        <ActivityIndicator size="small" color="orange" />
-      ) : (
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-        />
-      )}
-    </View>
-  );
+ return (
+  <View style={styles.container}>
+    <Text style={styles.heading}>New Arrivals</Text>
+
+    {loading ? (
+      <ActivityIndicator size="small" color="orange" />
+    ) : products.length === 0 ? (
+      <Text style={styles.noDataText}>No Products Found</Text>
+    ) : (
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+      />
+    )}
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -132,6 +153,12 @@ const styles = StyleSheet.create({
     color: '#888',
     textDecorationLine: 'line-through',
   },
+  noDataText: {
+  textAlign: 'center',
+  fontSize: 16,
+  color: '#888',
+  paddingVertical: 20,
+},
 });
 
 export default NewArrivals;

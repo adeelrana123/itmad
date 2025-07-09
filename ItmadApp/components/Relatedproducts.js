@@ -37,9 +37,13 @@ const RelatedProductsList = ({ categoryId, excludeProductId }) => {
       : 0;
 
     return (
+      
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate('Detail', { product: item })}
+        onPress={() => {
+  // console.log('Navigating to Detail:', item.title );
+  navigation.push('Detail', { product: item });
+}}
       >
         <Image source={{ uri: item.images[0] }} style={styles.image} />
 

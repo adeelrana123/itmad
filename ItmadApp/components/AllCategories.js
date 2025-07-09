@@ -53,13 +53,14 @@ const CategoriesList = () => {
   );
 
  
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Browse Categories</Text>
-      {loading ? (
-              <ActivityIndicator size="small" color="orange" />
-            ) : (
+return (
+  <View style={styles.container}>
+    <Text style={styles.heading}>Browse Categories</Text>
+    {loading ? (
+      <ActivityIndicator size="small" color="orange" />
+    ) : categories.length === 0 ? (
+      <Text style={styles.noDataText}>No Data Found</Text>
+    ) : (
       <FlatList
         data={categories}
         keyExtractor={(item) => item._id}
@@ -67,10 +68,11 @@ const CategoriesList = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 10 }}
-      />)
-            }
-    </View>
-  );
+      />
+    )}
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -109,6 +111,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 5,
   },
+  noDataText: {
+  textAlign: 'center',
+  fontSize: 16,
+  color: '#888',
+  paddingVertical: 20,
+},
 });
 
 export default CategoriesList;

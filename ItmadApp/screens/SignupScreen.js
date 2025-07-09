@@ -12,7 +12,7 @@ import { signup } from '../services/authApi';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 import { useAppTheme } from '../theme/ThemeContext';
-// import useAppTheme from '../theme/useAppTheme';
+
 
 const SignupScreen = () => {
   const navigation = useNavigation();
@@ -54,12 +54,14 @@ const handleSignup = async () => {
         value={username}
         onChangeText={setUsername}
         style={styles.input}
+        placeholderTextColor={colors.placeholderText}
       />
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         style={styles.input}
+        placeholderTextColor={colors.placeholderText}
       />
       <TextInput
         placeholder="Password"
@@ -67,6 +69,7 @@ const handleSignup = async () => {
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
+        placeholderTextColor={colors.placeholderText}
       />
        <TouchableOpacity style={styles.loginButton} onPress={handleSignup}>
               <Text style={styles.loginButtonText}>Signup</Text>

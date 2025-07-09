@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  PanResponder,
 } from 'react-native';
 import Header from '../components/Header';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,18 +15,20 @@ import { useDispatch } from 'react-redux';
 import { addToCart, clearCart } from '../redux/cartSlice';
 import { useNavigation } from '@react-navigation/native';
 import { useWindowDimensions } from 'react-native';
-import RelatedButton from '../components/Relatedproducts';
 import ProductReviews from '../components/ProductReviews';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProductDescription from '../components/ProductDescription';
 import { fetchProductsByslug } from '../services/api';// at top
+import RelatedProductsList from '../components/Relatedproducts';
 const DetailScreen = ({ route }) => {
   const { product, slug } = route.params;
+  // console.log('Received route params:', route.params);
+
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
   const scrollViewRef = useRef(null);
-
+const [selectedVariantValues, setSelectedVariantValues] = useState({});
   const [loadedProduct, setLoadedProduct] = useState(product);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageArray, setImageArray] = useState(product?.images || []);
@@ -46,21 +49,26 @@ const DetailScreen = ({ route }) => {
     }
   }, [loadedProduct]);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (slug) {
-        try {
-          const result = await fetchProductsByslug(slug);
-          // console.log('✅ Product loaded by slug:', result);
-          setLoadedProduct(result);
-          setImageArray(result?.images || []);
-        } catch (error) {
-          console.error('❌ Error fetching product by slug:', error);
-        }
+ useEffect(() => {
+  // 🟡 Clear previous product before loading new one
+  // setLoadedProduct(null);
+
+  const fetchProduct = async () => {
+    if (slug) {
+      try {
+        const result = await fetchProductsByslug(slug);
+        // console.log('➡️ category:', result.category);
+        setLoadedProduct(result);
+        setImageArray(result?.images || []);
+      } catch (error) {
+        console.error('❌ Error fetching product by slug:', error);
       }
-    };
-    fetchProduct();
-  }, [slug]);
+    }
+  };
+
+  fetchProduct();
+}, [slug]);
+
 
   if (!loadedProduct) {
     return (
@@ -69,13 +77,14 @@ const DetailScreen = ({ route }) => {
       </View>
     );
   }
-
+const variantKey = `${loadedProduct._id}_${imageArray[currentImageIndex]}`;
   const cartPayload = {
     id: loadedProduct._id,
     title: loadedProduct.title,
     salePrice: loadedProduct.salePrice,
     image: imageArray[currentImageIndex] || '',
     deliveryCharges: loadedProduct.deliveryCharges ?? 200,
+  variantKey: variantKey,
     freeShipping: loadedProduct.freeShipping ?? false,
   };
 
@@ -84,33 +93,47 @@ const DetailScreen = ({ route }) => {
     chatId: `${selectedUserId}_${loadedProduct._id}`,
     title: loadedProduct.title,
     image: imageArray[currentImageIndex] || '',
+  
     price: loadedProduct.salePrice,
     shipping: loadedProduct.freeShipping
-      ? 'Free Shipping'
-      : `Shipping: Rs. ${loadedProduct.deliveryCharges}`,
+      ? 'Free Delivery'
+      : `Delivery: Rs. ${loadedProduct.deliveryCharges}`,
   };
 
-  const renderImage = () => {
-    if (!imageArray.length) {
-      return (
-        <View style={styles.noImageContainer}>
-          <Icon name="image" size={50} color="#ccc" />
-          <Text style={styles.noImageText}>No Image Available</Text>
-        </View>
-      );
-    }
+ const renderImage = () => {
+  if (!imageArray.length) {
+    return (
+      <View style={styles.noImageContainer}>
+        <Icon name="image" size={50} color="#ccc" />
+        <Text style={styles.noImageText}>No Image Available</Text>
+      </View>
+    );
+  }
 
-    const handleNext = () => {
-      setCurrentImageIndex(prev =>
-        prev < imageArray.length - 1 ? prev + 1 : 0
-      );
-    };
+  const handleNext = () => {
+    setCurrentImageIndex(prev =>
+      prev < imageArray.length - 1 ? prev + 1 : 0
+    );
+  };
 
-    const handlePrev = () => {
-      setCurrentImageIndex(prev =>
-        prev > 0 ? prev - 1 : imageArray.length - 1
-      );
-    };
+  const handlePrev = () => {
+    setCurrentImageIndex(prev =>
+      prev > 0 ? prev - 1 : imageArray.length - 1
+    );
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > 50) {
+          handlePrev();
+        } else if (gestureState.dx < -50) {
+          handleNext();
+        }
+      },
+    })
+  ).current;
 
     return (
       <View style={styles.imageWrapper}>
@@ -118,11 +141,18 @@ const DetailScreen = ({ route }) => {
           <Icon name="chevron-left" size={30} color="gray" />
         </TouchableOpacity>
 
-        <Image
-          source={{ uri: imageArray[currentImageIndex] }}
-          style={styles.image}
-          resizeMode="contain"
-        />
+     <View style={styles.imageWrapper} {...panResponder.panHandlers}>
+  <Image
+        source={{ uri: imageArray[currentImageIndex] }}
+        style={styles.image}
+        resizeMode="contain"
+      />
+  <View style={styles.imageCounter}>
+    <Text style={styles.counterText}>
+      {currentImageIndex + 1} / {imageArray.length}
+    </Text>
+  </View>
+</View>
 
         <TouchableOpacity style={styles.rightZone} onPress={handleNext}>
           <Icon name="chevron-right" size={30} color="gray" />
@@ -141,34 +171,46 @@ const DetailScreen = ({ route }) => {
     <View style={styles.variantContainer}>
       <Text style={styles.variantName}>{item.name}:</Text>
       <View style={styles.variantValues}>
-        {item.values.map(value => {
-         const index = imageArray.findIndex(img => {
-  // Make sure both img and value.image are strings before calling includes
-  if (typeof img !== 'string' || typeof value.image !== 'string') return false;
-  return img.includes(value.image) || value.image.includes(img);
-});
+      {item.values.map(value => {
+  const isSelected = selectedVariantValues[item._id] === value._id;
 
-          return (
-            <TouchableOpacity
-              key={value._id}
-              style={styles.variantItem}
-              onPress={() => {
-                if (index !== -1) {
-                  setCurrentImageIndex(index);
-                } else if (value.image) {
-                  const updatedArray = [...imageArray, value.image];
-                  setImageArray(updatedArray);
-                  setCurrentImageIndex(updatedArray.length - 1);
-                }
-              }}
-            >
-              {value.image && (
-                <Image source={{ uri: value.image }} style={styles.variantImage} />
-              )}
-              <Text style={styles.variantText}> {value.value}</Text>
-            </TouchableOpacity>
-          );
-        })}
+  const index = imageArray.findIndex(img => {
+    if (typeof img !== 'string' || typeof value.image !== 'string') return false;
+    return img.includes(value.image) || value.image.includes(img);
+  });
+
+  return (
+    <TouchableOpacity
+      key={value._id}
+      style={[
+        styles.variantItem,
+        isSelected && styles.selectedVariantItem
+      ]}
+      onPress={() => {
+        setSelectedVariantValues(prev => ({
+          ...prev,
+          [item._id]: value._id,
+        }));
+
+        if (index !== -1) {
+          setCurrentImageIndex(index);
+        } else if (value.image) {
+          const updatedArray = [...imageArray, value.image];
+          setImageArray(updatedArray);
+          setCurrentImageIndex(updatedArray.length - 1);
+        }
+      }}
+    >
+      {value.image && (
+        <Image source={{ uri: value.image }} style={styles.variantImage} />
+      )}
+      <Text style={[styles.variantText, isSelected && { fontWeight: 'bold', color: 'green' }]}>
+        {value.value} {isSelected ? '✔️' : ''}
+      </Text>
+    </TouchableOpacity>
+  );
+})}
+
       </View>
     </View>
   );
@@ -183,19 +225,27 @@ const DetailScreen = ({ route }) => {
         <View style={styles.detailContainer}>
           <Text style={styles.value}>{loadedProduct.title}</Text>
 
-         <TouchableOpacity
+      <TouchableOpacity
+  disabled={!loadedProduct.category?.slug}
   onPress={() => {
-    console.log('Navigating to CategoryScreen with slug:', loadedProduct.category?.slug);
     navigation.navigate('CategoryScreen', {
       categoryId: loadedProduct.category?._id,
       categoryName: loadedProduct.category?.slug,
     });
   }}
 >
-            <Text style={[styles.value, styles.linkText]}>
-              {loadedProduct.category?.name}
-            </Text>
-          </TouchableOpacity>
+  <Text
+    style={[
+      styles.value,
+      styles.linkText,
+      !loadedProduct.category?.slug && { color: 'black' }, 
+    ]}
+  >
+    {loadedProduct.category?.name || 'Loading category...'}
+  </Text>
+</TouchableOpacity>
+
+
 
           <View style={styles.priceContainer}>
             <Text style={styles.salePrice}>Rs. {loadedProduct.salePrice}</Text>
@@ -280,7 +330,7 @@ const DetailScreen = ({ route }) => {
           <View style={styles.related}>
             <Text style={styles.textrelated}>Related Products</Text>
           </View>
-          <RelatedButton
+          <RelatedProductsList
             categoryId={categoryId}
             excludeProductId={excludeProductId}
           />
@@ -291,7 +341,8 @@ const DetailScreen = ({ route }) => {
         <TouchableOpacity
           onPress={
             () =>{ dispatch(addToCart(cartPayload));
-               navigation.navigate('MainTabs', { screen: 'Cart' })}}
+              //  navigation.navigate('MainTabs', { screen: 'Cart' })
+              }}
           style={styles.reviewButtonBottom}
         >
           <Ionicons name="cart-outline" size={16} color="#fff" />
@@ -324,7 +375,7 @@ const DetailScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  image: { width: 350, height: 350, alignSelf: 'center', borderRadius: 8, marginTop: 3,justifyContent:"center" },
+  image: { width: 350, height: 330, alignSelf: 'center', borderRadius: 8,justifyContent:"center" },
   noImageContainer: { width: '95%', height: 400, backgroundColor: '#f4f4f4', justifyContent: 'center', alignItems: 'center', borderRadius: 8, alignSelf: 'center' },
   noImageText: { fontSize: 18, color: '#888', fontWeight: '500' },
   detailContainer: { paddingHorizontal: 20, backgroundColor: '#fff' },
@@ -447,7 +498,10 @@ counterText: {
   fontSize: 14,
   fontWeight: 'bold',
 },
-
+selectedVariantItem: {
+  borderColor: 'green',
+  backgroundColor: '#e0ffe0',
+}
 
 });
 

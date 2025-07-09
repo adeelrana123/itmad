@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Header from '../components/Header';
-// import useAppTheme from '../theme/useAppTheme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppTheme } from '../theme/ThemeContext';
 

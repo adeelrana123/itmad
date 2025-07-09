@@ -9,7 +9,7 @@ const appTheme = {
     black: '#000000',
     borderColor: '#ddd',
     placeholderText: '#999999',
-
+header:'#FF6B00',
     // Additional colors
     cardBackground: '#f9f9f9',       
     mutedText: '#666666',             
@@ -28,7 +28,7 @@ const appTheme = {
     black: '#000000',
     borderColor: '#333',
     placeholderText: '#cccccc',
-
+header:'#FF6B00',
     // Additional colors
     cardBackground: '#1E1E1E',
     mutedText: '#aaaaaa',

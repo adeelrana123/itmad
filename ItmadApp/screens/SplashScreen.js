@@ -11,6 +11,7 @@ const SplashScreen = () => {
     const timer = setTimeout(() => {
       navigation.replace('MainTabs');
     }, 2000);
+
     return () => clearTimeout(timer);
   }, [navigation]);
 
@@ -18,6 +19,7 @@ const SplashScreen = () => {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      padding:10,
     },
     image: {
       width: '100%',

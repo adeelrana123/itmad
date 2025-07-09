@@ -37,36 +37,41 @@ const navigation = useNavigation();
 
   
 
-  return (   
-
-<View>
-     <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Brands</Text>
-          </View>
-   
-{loading ? (
-        <ActivityIndicator size="small" color="orange" />
-      ) : (
-
-    <FlatList
-      data={brands}
-      horizontal
-      keyExtractor={(item) => item._id}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item }) => (
-        <TouchableOpacity style={styles.brandItem} onPress={() => navigation.navigate('BrandProducts', { brand:item.name })}>
-           <View style={styles.logoContainer}>
-  <Image source={{ uri: item.logo }} style={styles.logo} />
-</View>
-        
-          <Text style={styles.brandName}>{item.name}</Text>
-        </TouchableOpacity>
-      )}
-    /> )
-}
+ return (
+  <View>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>Top Brands</Text>
     </View>
-  );
+
+    {loading ? (
+      <ActivityIndicator size="small" color="orange" />
+    ) : brands.length === 0 ? (
+      <Text style={styles.noDataText}>No Brands Found</Text>
+    ) : (
+      <FlatList
+        data={brands}
+        horizontal
+        keyExtractor={(item) => item._id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.brandItem}
+            onPress={() =>
+              navigation.navigate('BrandProducts', { brand: item.name })
+            }
+          >
+            <View style={styles.logoContainer}>
+              <Image source={{ uri: item.logo }} style={styles.logo} />
+            </View>
+            <Text style={styles.brandName}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    )}
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -120,6 +125,12 @@ logo: {
     textAlign: 'center',
     textTransform:"uppercase"
   },
+  noDataText: {
+  textAlign: 'center',
+  fontSize: 16,
+  color: '#888',
+  paddingVertical: 20,
+},
 });
 
 export default BrandsList;

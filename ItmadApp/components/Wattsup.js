@@ -7,38 +7,16 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native'
 import Icon from 'react-native-vector-icons/FontAwesome';
 const Wattsup = () => {
   const navigation = useNavigation();
-  const [checkingLogin, setCheckingLogin] = useState(true);
-
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        navigation.navigate('Login', { redirectTo: 'Message' });
-      } else {
-        setCheckingLogin(false);
-      }
-    };
-    checkLogin();
-  }, []);
 
   const openWhatsApp = () => {
     const phoneNumber = '923085782560'; 
     const url = `https://wa.me/${phoneNumber}`;
     Linking.openURL(url).catch(err => console.error('Failed to open WhatsApp:', err));
   };
-
-  if (checkingLogin) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#FF6B00" />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1 }}>

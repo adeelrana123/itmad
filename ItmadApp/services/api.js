@@ -68,7 +68,7 @@ export const fetchbrandproduct = async (brand) => {
 };
 export const fetchProductsByCategory = async (categoryName) => {
   try {
-    // console.log("API request categoryName:", categoryName);
+    // console.log("API request categoryName adeel:", categoryName);
     const response = await api.get(`/search/filter/category`, {
       params: { categoryName },
     });

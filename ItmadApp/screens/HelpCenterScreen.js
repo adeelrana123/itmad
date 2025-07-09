@@ -1,35 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 import { useAppTheme } from '../theme/ThemeContext';
 
-
 const HelpCenterScreen = () => {
   const navigation = useNavigation();
-  const [checkingLogin, setCheckingLogin] = useState(true);
   const theme = useAppTheme();
-
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        navigation.navigate('Login', { redirectTo: 'Help' });
-      } else {
-        setCheckingLogin(false);
-      }
-    };
-    checkLogin();
-  }, []);
 
   const handleEmailPress = () => {
     Linking.openURL('mailto:support@etimadmart.com');
@@ -38,14 +22,6 @@ const HelpCenterScreen = () => {
   const handlePhonePress = () => {
     Linking.openURL('tel:+923001234567');
   };
-
-  if (checkingLogin) {
-    return (
-      <View style={styles(theme).loader}>
-        <ActivityIndicator size="large" color={theme.buttonBackground} />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -77,7 +53,6 @@ export default HelpCenterScreen;
 
 const styles = (theme) =>
   StyleSheet.create({
-    loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     container: {
       padding: 20,
       backgroundColor: theme.background,

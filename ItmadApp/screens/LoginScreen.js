@@ -52,6 +52,7 @@ await AsyncStorage.setItem('profileImage', res.data.user.image || '');
           value={email}
           onChangeText={setEmail}
           style={styles.input}
+          placeholderTextColor={colors.placeholderText}
         />
         <TextInput
           placeholder="Password"
@@ -59,6 +60,7 @@ await AsyncStorage.setItem('profileImage', res.data.user.image || '');
           onChangeText={setPassword}
           secureTextEntry
           style={styles.input}
+          placeholderTextColor={colors.placeholderText}
         />
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Login</Text>

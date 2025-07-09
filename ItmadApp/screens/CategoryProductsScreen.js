@@ -17,41 +17,63 @@ import { fetchProductsByCategory } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = (screenWidth - 30) / 2;
+
 const CategoryProductsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { categorySlug, categoryName } = route.params;
 
+  const { categoryId, categorySlug, categoryName } = route.params || {};
+  
+  console.log('CategoryScreen → categoryName:', categoryName ,categorySlug);
+// console.log('object',route.params)
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchProductsByCategory(categorySlug);
-      if (data.success) {
-        setAllProducts(data.products);
-        setProducts(data.products);
-      } else {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Decide param to send to API
+        const param = categorySlug || categoryId;
+
+        if (!param) {
+          setError('No category information provided.');
+          setProducts([]);
+          setAllProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        // Call API with correct param
+        const data = await fetchProductsByCategory(param);
+
+        if (data.success) {
+          setAllProducts(data.products);
+          setProducts(data.products);
+        } else {
+          setError(data.message || 'No products found');
+          setAllProducts([]);
+          setProducts([]);
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products.');
         setAllProducts([]);
         setProducts([]);
-        setError(data.message || 'No products found');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load products.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
     fetchProducts();
-  }, [categorySlug]);
+  }, [categorySlug, categoryId]);
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -89,7 +111,14 @@ const CategoryProductsScreen = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.productCard}
-      onPress={() => navigation.navigate('Detail', { product: item })}
+     onPress={() =>
+  navigation.navigate('Detail', {
+     slug: item.slug,
+    product: item,
+    categorySlug: categorySlug, 
+    categoryName: categoryName,
+  })
+}
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>{renderProductImage(item)}</View>
@@ -112,7 +141,13 @@ const CategoryProductsScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header title={categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase()} />
+      <Header
+        title={
+          categoryName
+            ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase()
+            : 'Category'
+        }
+      />
 
       <View style={styles.container}>
         <View style={styles.searchContainer}>
@@ -168,9 +203,6 @@ const CategoryProductsScreen = () => {
   );
 };
 
-const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 30) / 2;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -221,7 +253,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 10,
     overflow: 'hidden',
-   
+
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -235,15 +267,15 @@ const styles = StyleSheet.create({
     }),
   },
   gridContainer: {
-  paddingHorizontal: 10,
-  paddingBottom: 20,
-  marginTop:5
-},
+    paddingHorizontal: 10,
+    paddingBottom: 20,
+    marginTop: 5,
+  },
 
-columnWrapper: {
-  justifyContent: 'space-between',
-  marginBottom: 10,
-},
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   imageContainer: {
     width: '100%',
     height: 150,

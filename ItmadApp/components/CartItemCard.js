@@ -12,7 +12,7 @@ const CartItemCard = ({ item, onIncrement, onDecrement, onRemove }) => {
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.price}>Rs. {item.salePrice}</Text>
         <Text style={styles.shipping}>
-          {item.freeShipping ? 'Free Shipping' : `Delivery: Rs. ${item.deliveryCharges}`}
+          {item.freeShipping ? 'Free Delivery' : `Delivery: Rs. ${item.deliveryCharges}`}
         </Text>
         <View style={styles.actions}>
           <TouchableOpacity onPress={onDecrement}>

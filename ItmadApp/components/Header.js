@@ -21,7 +21,7 @@ const Header = ({ title }) => {
     <View
       style={[
         styles.headerContainer,
-        { backgroundColor: colors.green  },
+        { backgroundColor: colors.buttonBackground },
       ]}
     >
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
