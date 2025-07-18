@@ -12,7 +12,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { fetchAllproductcategorygetAll } from '../services/api';
  const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 30) / 2;
+// const cardWidth = (screenWidth - 30) / 2;
+const cardWidth = (screenWidth - 50) / 3 ;
 
 const CategoriesList = () => {
   const navigation = useNavigation();
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width:cardWidth,
-    marginRight: 12,
+    marginRight: 5,
     backgroundColor: '#fff',
     borderRadius: 8,
     overflow: 'hidden',
@@ -101,11 +102,11 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 170,
+    height: 100,
     resizeMode: 'cover',
   },
   title: {
-    marginTop: 6,
+    marginTop: 3,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',

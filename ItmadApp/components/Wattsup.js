@@ -13,7 +13,7 @@ const Wattsup = () => {
   const navigation = useNavigation();
 
   const openWhatsApp = () => {
-    const phoneNumber = '923085782560'; 
+    const phoneNumber = '+92 307 1111832'; 
     const url = `https://wa.me/${phoneNumber}`;
     Linking.openURL(url).catch(err => console.error('Failed to open WhatsApp:', err));
   };

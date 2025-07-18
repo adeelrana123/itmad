@@ -25,6 +25,7 @@ import {
 } from '@react-native-firebase/firestore';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const ChatScreen = ({ route }) => {
   const { userId, chatId, title, image, price, shipping } = route.params;
@@ -33,7 +34,7 @@ const ChatScreen = ({ route }) => {
   const [username, setUsername] = useState('User');
   const [adminMessage, setAdminMessage] = useState('');
   const scrollViewRef = useRef();
-
+const colors = useAppTheme();
   const db = getFirestore();
   const chatDocRef = doc(db, 'chats', chatId);
   const messagesCollectionRef = collection(chatDocRef, 'messages');

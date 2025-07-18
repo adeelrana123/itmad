@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
+  Linking,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -17,37 +19,75 @@ import {
 } from '../redux/cartSlice';
 import CartItemCard from '../components/CartItemCard';
 import Header from '../components/Header';
-
+import Icon from 'react-native-vector-icons/FontAwesome';
 const CartScreen = () => {
+  
   const navigation = useNavigation();
   const cartItems = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
+ 
+  const getSubtotal = () => {
+  return cartItems.reduce((sum, item) => sum + item.salePrice * item.quantity, 0);
+};
+const hasDeliveryCharge = cartItems.some(item => !item.freeShipping);
+const deliveryCharge = hasDeliveryCharge ? 200 : 0;
+const totalBill = getSubtotal() + deliveryCharge;  
+const openWhatsApp = () => {
+  const phoneNumber = '+923071111832';
 
-  const getTotal = () => {
-    let total = cartItems.reduce(
-      (sum, item) => sum + item.salePrice * item.quantity,
-      0
-    );
-    const hasDeliveryCharge = cartItems.some(item => !item.freeShipping);
+  if (cartItems.length === 0) {
+    Alert.alert('Cart is empty', 'Please add products to cart before ordering.');
+    return;
+  }
 
-    if (hasDeliveryCharge) {
-      total += 200;
-    }
+  let message = `🛒 *New Order Request*\n\n`;
 
-    return total;
-  };
+  cartItems.forEach((item, index) => {
+    const selectedValue = item.selectedOptionText || 'N/A';
+    const displayTitle = selectedValue !== 'N/A' 
+      ? `${item.title} – ${selectedValue}`
+      : item.title;
 
-  const renderItem = ({ item }) => (
-    <CartItemCard
-      item={item}
-      onIncrement={() => dispatch(incrementQuantity(item.id))}
-      onDecrement={() => dispatch(decrementQuantity(item.id))}
-     onRemove={() => dispatch(removeFromCart({ variantKey: item.variantKey }))}
-    />
-  );
+    message += `
+${index + 1}) *${displayTitle}*
+- Price: Rs. ${item.salePrice}
+- Quantity: ${item.quantity}
+`;
+  });
+
+  const subtotal = getSubtotal();
+  const deliveryCharge = cartItems.some(item => !item.freeShipping) ? 200 : 0;
+  const total = subtotal + deliveryCharge;
+
+  message += `
+━━━━━━━━━━━━━━━
+*Subtotal:* Rs. ${subtotal}
+🚚 *Delivery Charges:* Rs. ${deliveryCharge}
+*Total Amount:* Rs. ${total}
+━━━━━━━━━━━━━━━
+Thank you for shopping with us!
+`;
+
+  const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+
+  Linking.openURL(url).catch(() => {
+    Alert.alert('Error', 'Make sure WhatsApp is installed on your device.');
+  });
+};
+
+
+ const renderItem = ({ item }) => (
+  <CartItemCard
+    item={item}
+    onIncrement={() => dispatch(incrementQuantity(item.variantKey))}
+    onDecrement={() => dispatch(decrementQuantity(item.variantKey))}
+    onRemove={() => dispatch(removeFromCart({ variantKey: item.variantKey }))}
+  />
+);
+
 
   if (!cartItems) {
-    // Optionally handle undefined cartItems
+  
     return (
       <View style={styles.container}>
         <Header title="Cart" />
@@ -76,24 +116,44 @@ const CartScreen = () => {
           />
 
           <View style={styles.footer}>
-            <Text style={styles.totalText}>Total: Rs. {getTotal()}</Text>
+            <Text style={styles.totalTexts}>Summary </Text>
 
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={() => dispatch(clearCart())}
-            >
-              <Text style={styles.clearText}>Clear Cart</Text>
-            </TouchableOpacity>
+     <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+              <Text style={styles.totalText}>SubTotal</Text>
+             <Text style={styles.totalText}>Rs. {getSubtotal()}</Text>
+     </View>
+ <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+<Text style={styles.totalText}>Delivery Charges</Text>
+<Text style={styles.totalText}>Rs. {deliveryCharge}</Text>
+ </View>
+ <View style={{flexDirection:"row",justifyContent:"space-between",marginBottom:5}}>
+<Text style={styles.totalTextbill}>Total Bill</Text>
+<Text style={styles.totalTextbill}>Rs. {totalBill}</Text>
+      </View>      
 
             <TouchableOpacity
               style={[
-                styles.checkoutButton,
-                cartItems.length === 0 && { backgroundColor: '#999' },
+                styles.checkoutButton,{backgroundColor:'gray'},
+                // cartItems.length === 0 && { backgroundColor: '#999' },
               ]}
               disabled={cartItems.length === 0}
               onPress={() => navigation.navigate('CartScreens')} 
             >
-              <Text style={styles.checkoutText}>Checkout</Text>
+              <Text style={styles.checkoutText}>Proceed to Order</Text>
+            </TouchableOpacity>
+
+             <TouchableOpacity
+             onPress={() =>openWhatsApp()}
+              style={styles.checkoutButton}
+            >
+              <Icon name="whatsapp" size={20} color="#fff" />
+              <Text style={styles.clearText}>Order by Wattsup</Text>
+            </TouchableOpacity>
+             <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => dispatch(clearCart())}
+            >
+              <Text style={styles.clearText}>Clear Cart</Text>
             </TouchableOpacity>
           </View>
         </>
@@ -110,23 +170,37 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: 1,
     borderColor: '#ddd',
-    padding: 15,
+    paddingHorizontal: 15,
     backgroundColor: '#fff',
   },
-  totalText: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+   totalTexts: { fontSize: 18,
+     fontWeight: 'bold', 
+     color:'#FF3B30',
+     textAlign:"center"
+     },
+  totalText: { fontSize: 14,
+     fontWeight: 'bold', 
+     },
+      totalTextbill: { fontSize: 18,
+     fontWeight: 'bold', 
+     color:'#FF3B30',
+     },
   clearButton: {
     backgroundColor: '#FF3B30',
     padding: 10,
     borderRadius: 6,
     alignItems: 'center',
-    marginBottom: 10,
+    
   },
-  clearText: { color: 'white', fontWeight: 'bold' },
+  clearText: { color: 'white', fontWeight: 'bold',marginLeft:5 },
   checkoutButton: {
     backgroundColor: '#4CAF50',
-    padding: 12,
+    padding: 10,
     borderRadius: 6,
     alignItems: 'center',
+    marginBottom:5,
+    flexDirection:"row",
+    justifyContent:"center"
   },
   checkoutText: { color: 'white', fontWeight: 'bold' },
 });

@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
+  ScrollView,
   Image,
   StyleSheet,
   Dimensions,
+  Animated,
+  TouchableOpacity,
 } from 'react-native';
 import { fetchbanner } from '../services/api';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const BannerListScreen = () => {
   const [banners, setBanners] = useState([]);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -27,28 +32,69 @@ const BannerListScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (banners.length === 0) return;
-
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
+      if (banners.length > 0) {
+        const nextIndex = (currentIndex + 1) % banners.length;
+        scrollRef.current.scrollTo({ x: nextIndex * width, animated: true });
+        setCurrentIndex(nextIndex);
+      }
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [banners]);
+  }, [currentIndex, banners]);
 
-  // 🛡️ Prevent crash if banners is empty
-  if (!banners.length) return null;
-
-  const currentBanner = banners[currentIndex];
+  const handleDotPress = index => {
+    scrollRef.current.scrollTo({ x: index * width, animated: true });
+    setCurrentIndex(index);
+  };
 
   return (
     <View style={styles.container}>
-      <View style={{ width: width, height: height * 0.3, alignItems: 'center' }}>
-        <Image
-          source={{ uri: currentBanner.image }}
-          resizeMode="cover"
-          style={styles.image}
-        />
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
+        onMomentumScrollEnd={(event) => {
+          const index = Math.round(event.nativeEvent.contentOffset.x / width);
+          setCurrentIndex(index);
+        }}
+      >
+        {banners.map((banner, index) => (
+          <Image
+            key={index}
+            source={{ uri: banner.image }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        ))}
+      </ScrollView>
+
+      {/* Pagination Dots */}
+      <View style={styles.dotsContainer}>
+        {banners.map((_, i) => {
+          const opacity = scrollX.interpolate({
+            inputRange: [(i - 1) * width, i * width, (i + 1) * width],
+            outputRange: [0.3, 1, 0.3],
+            extrapolate: 'clamp',
+          });
+
+          const scale = scrollX.interpolate({
+            inputRange: [(i - 1) * width, i * width, (i + 1) * width],
+            outputRange: [1, 1.4, 1],
+            extrapolate: 'clamp',
+          });
+
+          return (
+            <TouchableOpacity key={i} onPress={() => handleDotPress(i)}>
+              <Animated.View style={[styles.dot, { opacity, transform: [{ scale }] }]} />
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -56,17 +102,25 @@ const BannerListScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    width: width,
-    height: height * 0.3,
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    height: 130,
   },
   image: {
-    width: '100%',
-    height: 100,
+    width: width,
+    height: 110,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 6,
+    marginBottom:6
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF6B00',
+    marginHorizontal: 6,
   },
 });
 

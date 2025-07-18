@@ -101,22 +101,22 @@ marginTop:10,
 
   },
  logoContainer: {
-  width: 60, // ya jitna aapko chahiye
+  width: 60, 
   height: 60,
-  padding: 10, // yahan se control hoga image ka size and spacing
+  padding: 10, 
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: 30,
-  backgroundColor: '#fff', // optional
+  backgroundColor: '#fff', 
   borderWidth: 1,
-  borderColor: '#ccc', // optional
+  borderColor: '#ccc', 
 },
 
 logo: {
   width: '100%',
   height: '100%',
-  resizeMode: 'contain', // 'objectFit' React Native mein nahi hota
-  borderRadius: 999, // fully round
+  resizeMode: 'contain', 
+  borderRadius: 999, 
 },
 
   brandName: {

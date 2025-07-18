@@ -1,14 +1,13 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import appTheme from './colors';
+
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(false);
-  const toggleTheme = () => setIsDark(prev => !prev);
-  const theme = isDark ? appTheme.dark : appTheme.light;
+  const theme = appTheme.light;  // Fixed to light mode, no toggle
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, isDark }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );

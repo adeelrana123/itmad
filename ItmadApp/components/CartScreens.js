@@ -14,13 +14,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   decrementQuantity,
   incrementQuantity,
-  removeFromCart,
   clearCart,
 } from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from './Header';
 import { createOrder } from '../services/api';
-import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 
 const CartScreens = () => {
@@ -65,7 +63,6 @@ const grandTotal = hasShipping ? subtotal + 200 : subtotal;
     if (
       !customerInfo.firstName ||
       !customerInfo.lastName ||
-      !customerInfo.province ||
       !customerInfo.city ||
       !customerInfo.street ||
       !customerInfo.mobile
@@ -81,7 +78,7 @@ const grandTotal = hasShipping ? subtotal + 200 : subtotal;
   shippingAddress: {
     firstName: customerInfo.firstName,
     lastName: customerInfo.lastName,
-    province: customerInfo.province,
+    // province: customerInfo.province,
     city: customerInfo.city,
     streetAddress: customerInfo.street,
     apartment: customerInfo.apartment,
@@ -147,49 +144,13 @@ const response = await createOrder(orderPayload);
                       resizeMode="cover"
                     />
                   )}
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <View style={styles.priceQtyRow}>
-                      <Text style={styles.price}>Rs. {item.salePrice}</Text>
-                      <View style={styles.quantityRow}>
-                        <TouchableOpacity onPress={() => dispatch(decrementQuantity(item.id))}>
-                          <Text style={styles.qtyBtn}>➖</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.qtyText}>{item.quantity}</Text>
-                        <TouchableOpacity onPress={() => dispatch(incrementQuantity(item.id))}>
-                          <Text style={styles.qtyBtn}>➕</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-
-                    <View style={styles.shippingDeleteRow}>
-                      {item.freeShipping || item.deliveryCharges === 0 ? (
-                        <View style={styles.shippingRow}>
-                          <Icon name="truck" size={16} color="green" style={styles.icon} />
-                          <Text style={styles.freeShipping}>Free Delivery</Text>
-                        </View>
-                      ) : (
-                        <View style={styles.shippingRow}>
-                          <Icon name="truck" size={16} color="#FF6B00" style={styles.icon} />
-                          <Text style={styles.shipping}>
-                            Delivery: Rs. {item.deliveryCharges}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-
-                    {/* <View style={styles.shippingDeleteRow}>
-                      <Text style={styles.total}>Total: Rs. {totalPrice}</Text>
-                      
-                    </View> */}
-                  </View>
+                  <Text style={styles.price}> Rs:{item.salePrice}</Text>
                 </View>
                 <Text style={styles.title}>{item.title}</Text>
               </View>
             </View>
           );
         })}
-
-        {/* Shipping Address */}
         <View style={{ padding: 15 }}>
           <Text style={styles.sectionTitle}>Your Address</Text>
 
@@ -205,26 +166,6 @@ const response = await createOrder(orderPayload);
             onChangeText={text => handleChange('lastName', text)}
             placeholderTextColor="#333"
           />
-
-          <View style={styles.input}>  
-  <Picker
-    selectedValue={customerInfo.province}
-    onValueChange={value => handleChange('province', value)}
-    style={styles.picker} 
-    dropdownIconColor="#333" 
-  >
-    <Picker.Item label="Select Province" value="" enabled={false} />
-    <Picker.Item label="Punjab" value="Punjab" />
-    <Picker.Item label="Sindh" value="Sindh" />
-    <Picker.Item label="Khyber Pakhtunkhwa" value="Khyber Pakhtunkhwa" />
-    <Picker.Item label="Balochistan" value="Balochistan" />
-    <Picker.Item label="Gilgit-Baltistan" value="Gilgit-Baltistan" />
-    <Picker.Item label="Islamabad Capital Territory" value="Islamabad" />
-    <Picker.Item label="Azad Jammu and Kashmir" value="AJK" />
-  </Picker>
-</View>
-
-
           <TextInput
             placeholder="City "
             style={styles.input}
@@ -251,7 +192,7 @@ const response = await createOrder(orderPayload);
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Email Address "
+            placeholder="Email Address (optional) "
             style={styles.input}
             keyboardType="email-address"
             onChangeText={text => handleChange('email', text)}
@@ -268,21 +209,36 @@ const response = await createOrder(orderPayload);
         </View>
       </ScrollView>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.grandTotal}>Grand Total: Rs. {grandTotal}</Text>
-        <TouchableOpacity
-          style={styles.submitBtn}
-          onPress={handleSubmitOrder}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.submitText}>Place Order</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+     <View style={styles.footer}>
+  {hasShipping && (
+    <View style={styles.shippingRow}>
+      <Icon name="truck" size={16} color="#FF6B00" style={styles.icon} />
+      <Text style={styles.shipping}>Delivery Charges: Rs. 200</Text>
+    </View>
+  )}
+
+  {!hasShipping && (
+    <View style={styles.shippingRow}>
+      <Icon name="truck" size={16} color="green" style={styles.icon} />
+      <Text style={styles.freeShipping}>Free Delivery</Text>
+    </View>
+  )}
+
+  <Text style={styles.grandTotal}>Grand Total: Rs. {grandTotal}</Text>
+
+  <TouchableOpacity
+    style={styles.submitBtn}
+    onPress={handleSubmitOrder}
+    disabled={loading}
+  >
+    {loading ? (
+      <ActivityIndicator color="#fff" />
+    ) : (
+      <Text style={styles.submitText}>Place Order</Text>
+    )}
+  </TouchableOpacity>
+</View>
+
     </View>
   );
 };
@@ -295,7 +251,8 @@ const styles = StyleSheet.create({
   scrollArea: { flex: 1 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   card: {
-    margin: 10,
+    marginHorizontal: 10,
+    marginVertical:5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
@@ -304,11 +261,12 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginVertical: 10,
+    marginVertical: 5,
+    justifyContent:"space-between"
   },
   thumbnail: {
-    width: 80,
-    height: 90,
+    width: 30,
+    height: 30,
     borderRadius: 8,
     backgroundColor: '#f0f0f0',
   },
@@ -327,7 +285,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   qtyBtn: {
-    fontSize: 26,
+    fontSize: 16,
     paddingHorizontal: 8,
   },
   qtyText: {
@@ -361,7 +319,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '700',
-    marginTop: 3,
     color: '#444',
   },
   footer: {
@@ -375,6 +332,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#e53935',
   },
   submitBtn: {
     backgroundColor: '#FF6B00',

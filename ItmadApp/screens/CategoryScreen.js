@@ -18,23 +18,25 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import { fetchProductsByCategory } from '../services/api';
+import Pagination from '../components/Pagination';
 
 const   CategoryScreen = () => {
+  const PAGE_SIZE = 10;
   const route = useRoute();
   const navigation = useNavigation();
   const {categoryId, categorySlug, categoryName} = route.params;
 ;
-// console.log('Received route params:', route.params);
-// console.log('categoryId:', categoryId);
-// console.log('categorySlug:', categorySlug);
-// console.log('categoryName:', categoryName);
 const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+ const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-
+  const onPageChange = (newPage) => {
+      setPage(newPage);
+    };
   const fetchProducts = async () => {
   try {
     setLoading(true);
@@ -43,12 +45,13 @@ const [allProducts, setAllProducts] = useState([]);
  
   // console.log('Fetching products by category:', { categoryName, categoryId });
   
-const data = await fetchProductsByCategory(categoryName);
+const data = await fetchProductsByCategory(categoryName,page, PAGE_SIZE);
 // const data = await fetchProductsByCategory(categorySlug);
 // console.log('fetchProductsByCategory response:', data);
 if (data.success) {
   setAllProducts(data.products); 
-  setProducts(data.products);    
+  setProducts(data.products);  
+  setTotalPages(data.totalPages || 1);  
 } else {
   setAllProducts([]);
   setProducts([]);
@@ -66,7 +69,7 @@ if (data.success) {
 
   useEffect(() => {
     fetchProducts();
-  }, [categoryName]);
+  }, [categoryName,page]);
   
 const handleSearch = (query) => {
   const searchText = query ? query.trim().toLowerCase() : '';
@@ -140,54 +143,46 @@ const handleSearch = (query) => {
     </TouchableOpacity>
   );
 
-  return (
-    <View style={{flex:1}}>
-   <Header title={'Category'} />
+return (
+  <View style={{ flex: 1 }}>
+    <Header title={'Category'} />
 
-
-       <View style={styles.container}>
-
-      
+    <View style={styles.container}>
       <View style={styles.searchContainer}>
-       <TextInput
-  placeholder="Search for products..."
-  value={searchQuery}
-  onChangeText={(text) => {
-    setSearchQuery(text);
-    handleSearch(text);
-  }}
-  style={styles.searchInput}
-  placeholderTextColor="#999"
-  clearButtonMode="while-editing"
-  underlineColorAndroid="transparent"
-/>
-
+        <TextInput
+          placeholder="Search for products..."
+          value={searchQuery}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            handleSearch(text);
+          }}
+          style={styles.searchInput}
+          placeholderTextColor="#999"
+          clearButtonMode="while-editing"
+          underlineColorAndroid="transparent"
+        />
         <TouchableOpacity
           style={styles.searchIconButton}
-          onPress={handleSearch}
+          onPress={() => handleSearch(searchQuery)}
         >
           <Icon name="search" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView>
-        <View style={styles.sectionHeader}>
-        
+      {error && (
+        <View style={styles.noDataContainer}>
+          <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
         </View>
+      )}
 
-        {error && (
-          <View style={styles.noDataContainer}>
-            <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
-          </View>
-        )}
-
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="orange"
-            style={styles.loadingIndicator}
-          />
-        ) : (
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="orange"
+          style={styles.loadingIndicator}
+        />
+      ) : (
+        <>
           <FlatList
             data={products}
             keyExtractor={(item) => item._id}
@@ -202,11 +197,17 @@ const handleSearch = (query) => {
             numColumns={2}
             columnWrapperStyle={styles.columnWrapper}
           />
-        )}
-      </ScrollView>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </>
+      )}
     </View>
-     </View>
-  );
+  </View>
+);
+
 };
 
 const screenWidth = Dimensions.get('window').width;

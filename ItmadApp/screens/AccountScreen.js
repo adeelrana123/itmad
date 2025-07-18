@@ -15,12 +15,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { logout } from '../services/authApi';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { useDispatch } from 'react-redux';
+import { logoutredux } from '../redux/authSlice';
 const AccountScreen = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [avatar, setAvatar] = useState(null);
+const dispatch = useDispatch();
 const CLOUDINARY_UPLOAD_PRESET = 'etimad_avatar_upload';
 const CLOUDINARY_CLOUD_NAME = 'dzp0kj3rw';
 
@@ -47,28 +50,32 @@ const uploadToCloudinary = async (fileUri) => {
   }
 };
 
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('token');
-      const name = await AsyncStorage.getItem('username');
-      const email = await AsyncStorage.getItem('email');
-      const avatarUri = await AsyncStorage.getItem('avatar');
+useEffect(() => {
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const name = await AsyncStorage.getItem('username');
+    const email = await AsyncStorage.getItem('email');
 
-      if (token && name && email) {
-        setUser({ name, email });
-        if (avatarUri) setAvatar(avatarUri);
-      } else {
-        setUser(null);
-      }
+    if (token && name && email) {
+      setUser({ name, email });
 
-      setLoading(false);
-    };
-
-    if (isFocused) {
-      setLoading(true);
-      checkLogin();
+      // 👇 Load avatar specific to this email
+      const avatarUri = await AsyncStorage.getItem(`avatar-${email}`);
+      if (avatarUri) setAvatar(avatarUri);
+      else setAvatar(null);
+    } else {
+      setUser(null);
+      setAvatar(null);
     }
-  }, [isFocused]);
+
+    setLoading(false);
+  };
+
+  if (isFocused) {
+    checkLogin(); // ✅ yeh line missing thi
+  }
+}, [isFocused]);
+
 
 
 
@@ -80,20 +87,24 @@ const pickImage = () => {
       {
         text: 'Camera',
         onPress: () => {
-          launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
-            if (!response.didCancel && !response.errorCode) {
-              const uri = response.assets[0].uri;
-              const imageUrl = await uploadToCloudinary(uri);
-              if (imageUrl) {
-                setAvatar(imageUrl);
-                await AsyncStorage.setItem('avatar', imageUrl);
-                Alert.alert('Success', 'Profile image updated!');
-              } else {
-                Alert.alert('Upload failed', 'Unable to upload image.');
-              }
-            }
-          });
-        },
+  launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
+    if (!response.didCancel && !response.errorCode) {
+      const uri = response.assets[0].uri;
+      const imageUrl = await uploadToCloudinary(uri);
+      if (imageUrl) {
+        setAvatar(imageUrl);
+        const storedEmail = await AsyncStorage.getItem('email');
+        if (storedEmail) {
+          await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
+        }
+        Alert.alert('Success', 'Profile image updated!');
+      } else {
+        Alert.alert('Upload failed', 'Unable to upload image.');
+      }
+    }
+  });
+},
+
       },
       {
         text: 'Gallery',
@@ -104,7 +115,10 @@ const pickImage = () => {
               const imageUrl = await uploadToCloudinary(uri);
               if (imageUrl) {
                 setAvatar(imageUrl);
-                await AsyncStorage.setItem('avatar', imageUrl);
+               const storedEmail = await AsyncStorage.getItem('email');
+if (storedEmail) {
+  await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
+}
                 Alert.alert('Success', 'Profile image updated!');
               } else {
                 Alert.alert('Upload failed', 'Unable to upload image.');
@@ -123,25 +137,31 @@ const pickImage = () => {
 };
 
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('username');
-      await AsyncStorage.removeItem('email');
-      Alert.alert('Logged out successfully');
-      navigation.replace('Login');
-    } catch (err) {
-      Alert.alert('Logout failed', err.message);
-    }
-  };
-  const handlePress = (screen) => {
-  navigation.navigate(screen);
+ const handleLogout = async () => {
+  try {
+    const email = await AsyncStorage.getItem('email');
+    await logout(); // API logout
+    dispatch(logoutredux());
+await AsyncStorage.multiRemove([
+  'token',
+  'username',
+  'email',
+  // `avatar-${email}`, ❌ Don't delete this
+]);
+
+
+    Alert.alert('Logged out successfully');
+    navigation.replace('Login');
+  } catch (err) {
+    Alert.alert('Logout failed', err.message);
+  }
 };
+
+
 
   const menuItems = [
     { title: 'My Orders', icon: 'list-alt', action: 'Orders', rightText: 'View All Orders >' },
-    { title: 'My Message', icon: 'envelope', action: 'AdminChats' },
+    // { title: 'My Message', icon: 'envelope', action: 'AdminChats' },
     { title: 'Help Center', icon: 'question-circle', action: 'Help Center' },
     { title: 'Settings', icon: 'cog', action: 'Settings' },
     { title: 'About Us', icon: 'info-circle', action: 'About Us' },

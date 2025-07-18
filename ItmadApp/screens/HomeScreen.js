@@ -10,9 +10,8 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchAllProducts } from '../services/api';
+import { fetchAllProducts, fetchBestSellers } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import BannerListScreen from '../components/BannerListScreen';
 import BrandsList from '../components/BrandsList';
 import TrendingProductsPaginated from '../components/TrendingProducts';
@@ -47,26 +46,29 @@ const HomeScreen = () => {
   //   fetchUserInfo();
   // }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchAllProducts(1, 50)
-      .then(res => {
-        let all = res.data.products;
-        if (searchQuery) {
-          all = all.filter(item =>
-            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-        setFilteredProducts(all);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.log('❌ API Error:', err);
-        setLoading(false);
-      });
-  }, [searchQuery]);
+useEffect(() => {
+  setLoading(true);
+  fetchBestSellers(1, 50)
+    .then(products => {
+      if (searchQuery) {
+        const filtered = products.filter(item =>
+          item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+      } else {
+        setFilteredProducts(products); 
+      }
+      setLoading(false);
+    })
+    .catch(err => {
+      console.log('❌ API Error:', err?.response?.data || err.message || err);
+      setLoading(false);
+    });
+}, [searchQuery]);
+
+
 
   const handleSearch = () => {
     const trimmed = searchQuery.trim();
@@ -78,7 +80,8 @@ const HomeScreen = () => {
     container: { flex: 1, backgroundColor: theme.background },
     searchContainer: {
       flexDirection: 'row',
-      padding: 10,
+      paddingHorizontal: 10,
+      paddingVertical:5,
       alignItems: 'center',
       position: 'relative',
       backgroundColor: '#fff',
@@ -116,14 +119,14 @@ const HomeScreen = () => {
     userInfoContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 10,
+      padding: 5,
       backgroundColor: '#FF6B00',
       borderBottomWidth: 1,
       borderColor: theme.borderColor,
     },
     avatarWrapper: { marginRight: 10 },
-    avatarImage: { width: 60, height: 30, borderRadius:10 },
-    userName: { fontSize: 24, fontWeight: 'bold', color: theme.white },
+    avatarImage: { width: 50, height: 25, borderRadius:10 },
+    userName: { fontSize: 20, fontWeight: 'bold', color: theme.white },
     userEmail: { fontSize: 12, color: theme.white },
     wattsupButtonWrapper: {
       position: 'absolute',
@@ -191,10 +194,10 @@ const HomeScreen = () => {
       </View>
 
       <ScrollView>
-        <View style={{ height: 100 }}>
+        <View style={{ height: 110 }}>
           <BannerListScreen />
         </View>
-        <View style={{ height: 240 }}>
+        <View style={{ height: 180 }}>
           <AllCategories />
         </View>
         <View style={{ height: 120 }}>
@@ -213,7 +216,7 @@ const HomeScreen = () => {
   )
 ) : (
   <>
-    <View style={{ height: 240 }}>
+    <View style={{ height: 220 }}>
       <TrendingProductsPaginated />
     </View>
     <View style={{ height: 240 }}>

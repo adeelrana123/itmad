@@ -1,5 +1,4 @@
-// components/BestSellers.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,34 +11,95 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { fetchBestSellers } from '../services/api';
+import Pagination from './Pagination';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 30) / 2;
-
-const BestSellers = ({ products, loading }) => {
+  const PAGE_SIZE = 10;
+const BestSellers = () => {
   const navigation = useNavigation();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  // console.log('projuct',products)
+ const onPageChange = (newPage) => {
+      setPage(newPage);
+    };
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetchBestSellers(page, PAGE_SIZE);
+        setProducts(response.products);
+        setTotalPages(response.totalPages);
+      } catch (error) {
+        console.error('Error fetching best sellers:', error);
+      }
+      setLoading(false);
+    };
+
+    loadProducts();
+  }, [page]);
+
+ 
+const StarRating = ({ rating }) => {
+  const maxStars = 5;
+  const stars = [];
+
+  for (let i = 1; i <= maxStars; i++) {
+    stars.push(
+      <Icon
+        key={i}
+        name="star"
+        size={16}
+        color={i <= rating ? '#FFD700' : '#CCCCCC'}  // yellow or gray
+        style={{ marginRight: 2 }}
+      />
+    );
+  }
+
+  return <View style={{ flexDirection: 'row' }}>{stars}</View>;
+};
 
   const renderProductImage = (item) => {
     const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
 
-    if (!imageUri) {
-      return (
-        <View style={styles.noImageContainer}>
-          <Text style={styles.noImageText}>No Image</Text>
-        </View>
-      );
-    }
-
     return (
-      <Image
-        source={{ uri: imageUri }}
-        style={styles.productImage}
-        resizeMode="cover"
-      />
+      <View style={styles.imageWrapper}>
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.productImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.noImageContainer}>
+            <Text style={styles.noImageText}>No Image</Text>
+          </View>
+        )}
+
+        {item.freeShipping && (
+          <View style={styles.freeShippingBadge}>
+            <View style={styles.badgeContent}>
+              <Icon name="truck" size={16} color="black" style={{ marginRight: 4 }} />
+              <Text style={styles.freeShippingText}>Free Shipping</Text>
+            </View>
+          </View>
+        )}
+      </View>
     );
   };
 
-  const renderProductCard = ({ item }) => (
+const renderProductCard = ({ item }) => {
+ const reviewsCount = item.reviews?.length || 0;
+  const minRating = reviewsCount > 0
+    ? Math.min(...item.reviews.map(r => r.rating))
+    : 0;
+
+  return (
     <TouchableOpacity
       style={styles.productCard}
       onPress={() =>
@@ -59,13 +119,22 @@ const BestSellers = ({ products, loading }) => {
           {item.price > item.salePrice && (
             <Text style={styles.originalPrice}>Rs. {item.price}</Text>
           )}
-          <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
+          <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
         </View>
         <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
+       
         <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+          <StarRating rating={minRating} />
+         <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
+{reviewsCount > 0 ? `(${reviewsCount})` : ''}
+</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
+};
+
 
   return (
     <View>
@@ -75,20 +144,23 @@ const BestSellers = ({ products, loading }) => {
       {loading ? (
         <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
       ) : (
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          contentContainerStyle={styles.gridContainer}
-          columnWrapperStyle={styles.columnWrapper}
-          renderItem={renderProductCard}
-          ListEmptyComponent={
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No products found</Text>
-            </View>
-          }
-          showsVerticalScrollIndicator={false}
-        />
+        <>
+          <FlatList
+            data={products}
+            keyExtractor={(item) => item._id}
+            numColumns={2}
+            contentContainerStyle={styles.gridContainer}
+            columnWrapperStyle={styles.columnWrapper}
+            renderItem={renderProductCard}
+            ListEmptyComponent={
+              <View style={styles.noDataContainer}>
+                <Text style={styles.noDataText}>No products found</Text>
+              </View>
+            }
+            showsVerticalScrollIndicator={false}
+          />
+            <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+        </>
       )}
     </View>
   );
@@ -195,6 +267,33 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     marginVertical: 20,
+  },
+  imageWrapper: {
+    position: 'relative',
+  },
+
+  freeShippingBadge: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+    backgroundColor: '#FFB727',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 5,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  badgeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  freeShippingText: {
+    color:'black',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

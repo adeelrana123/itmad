@@ -1,22 +1,64 @@
-// components/NewArrivals.js
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { fetchAllproductnewarrival } from '../services/api';
- const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 30) / 2;
+import { fetchNewArrivals } from '../services/api'; 
+import Pagination from './Pagination';
+import Icon from 'react-native-vector-icons/FontAwesome';
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = (screenWidth - 50) / 2.5;
+const PAGE_SIZE = 10;
+
+
 
 const NewArrivals = () => {
   const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  //  console.log('projuct',products)
+  const onPageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+
+const StarRating = ({ rating }) => {
+  const maxStars = 5;
+  const stars = [];
+
+  for (let i = 1; i <= maxStars; i++) {
+    stars.push(
+      <Icon
+        key={i}
+        name="star"
+        size={14}
+        color={i <= rating ? '#FFD700' : '#CCCCCC'} // Yellow if i <= rating else Gray
+        style={{ marginRight: 2 }}
+      />
+    );
+  }
+
+  return <View style={{ flexDirection: 'row' }}>{stars}</View>;
+};
+
+
 
   useEffect(() => {
     const loadNewArrivals = async () => {
+      setLoading(true);
       try {
-        const data = await fetchAllproductnewarrival();
-        setProducts(data);
+        const data = await fetchNewArrivals(page, PAGE_SIZE);
+        setProducts(data.products || []);
+        setTotalPages(data.totalPages || 1);
       } catch (err) {
         console.log('Failed to load new arrivals:', err);
       } finally {
@@ -25,76 +67,88 @@ const NewArrivals = () => {
     };
 
     loadNewArrivals();
-  }, []);
+  }, [page]);
 
-  const slugify = (text) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')      // spaces to hyphens
-    .replace(/[^\w\-]+/g, '')  // remove non-word chars
-    .replace(/\-\-+/g, '-');   // collapse multiple hyphens
-};
+ 
 
   const renderItem = ({ item }) => {
+     const reviewsCount = item.reviews?.length || 0;
+const minRating = reviewsCount > 0
+  ? Math.min(...item.reviews.map(r => r.rating))
+  : 0;
     const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
 
     return (
-      <TouchableOpacity
-        style={styles.card}
-       onPress={() => {
- console.log('Navigating with category slug:', item.category?.slug || slugify(item.category?.name || ''));
+ <TouchableOpacity
+  style={styles.card}
+  onPress={() => {
+    const productData = {
+      ...item,
+      userId: item.creator || 'fallback-id',
+      slug: item.slug || '',
+      category: item.category, // ✅ this line is missing in your log
+    };
+
+    // console.log('Passing to Detail:', productData);
+
+    navigation.navigate('Detail', {
+      product: productData,
+    });
+  }}
+>
 
 
- navigation.navigate('Detail', {
-  product: {
-    ...item,
-    userId: item.creator || 'fallback-id',
-    slug: item.slug || '',
-   categoryName: item.category?.slug || slugify(item.category?.name || '')
-  },
-});
 
-}}
 
-      >
-        <Image source={{ uri: imageUri }} style={styles.image} />
-       <View style={styles.productInfoContainer}>
-               <View style={styles.priceContainer}>
-                 {item.price > item.salePrice && (
-                   <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-                 )}
-                 <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
-               </View>
-               <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
-               <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
-             </View>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        ) : (
+          <View style={styles.noImageContainer}>
+            <Text style={styles.noImageText}>No Image</Text>
+          </View>
+        )}
+        <View style={styles.productInfoContainer}>
+          <View style={styles.priceContainer}>
+            {/* {item.price > item.salePrice && (
+              <Text style={styles.originalPrice}>Rs. {item.price}</Text>
+            )} */}
+            {/* <Text style={styles.productPrice}> Rs. {item.salePrice}</Text> */}
+          </View>
+          {/* <Text style={styles.productName} numberOfLines={1}>{item.title}</Text> */}
+          <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
+<View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+          <StarRating rating={minRating} />
+         <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
+{reviewsCount > 0 ? `(${reviewsCount})` : ''}
+</Text>
+        </View>
+        </View>
       </TouchableOpacity>
     );
   };
 
- return (
-  <View style={styles.container}>
-    <Text style={styles.heading}>New Arrivals</Text>
-
-    {loading ? (
-      <ActivityIndicator size="small" color="orange" />
-    ) : products.length === 0 ? (
-      <Text style={styles.noDataText}>No Products Found</Text>
-    ) : (
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-      />
-    )}
-  </View>
-);
-
+  return (
+    <View style={styles.container}>
+      <Text style={styles.heading}>New Arrivals</Text>
+      {loading ? (
+        <ActivityIndicator size="small" color="orange" />
+      ) : products.length === 0 ? (
+        <Text style={styles.noDataText}>No Products Found</Text>
+      ) : (
+        <>
+          <FlatList
+            data={products}
+            keyExtractor={(item) => item._id}
+            renderItem={renderItem}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          />
+          <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+        </>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -109,7 +163,7 @@ const styles = StyleSheet.create({
     color: '#FF9800',
   },
   card: {
-     width:cardWidth,
+    width: cardWidth,
     marginRight: 10,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -121,11 +175,19 @@ const styles = StyleSheet.create({
     height: 120,
     resizeMode: 'cover',
   },
- 
-  
-   productInfoContainer: {
+  noImageContainer: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#f2f2f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noImageText: {
+    color: '#999',
+    fontSize: 14,
+  },
+  productInfoContainer: {
     paddingHorizontal: 10,
-    
   },
   productName: {
     fontSize: 14,
@@ -146,19 +208,19 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    
   },
   originalPrice: {
     fontSize: 16,
     color: '#888',
     textDecorationLine: 'line-through',
+    marginRight: 5,
   },
   noDataText: {
-  textAlign: 'center',
-  fontSize: 16,
-  color: '#888',
-  paddingVertical: 20,
-},
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#888',
+    paddingVertical: 20,
+  },
 });
 
 export default NewArrivals;

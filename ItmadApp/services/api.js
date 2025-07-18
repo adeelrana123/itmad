@@ -4,35 +4,7 @@ const api = axios.create({
   baseURL: 'https://etimadmart.com/api/v1',
   timeout: 10000,
 });
-
-// Fetch all products
-export const fetchAllProducts = (page = 1, limit = 10) =>
-  api.get(`/product/getAll?page=${page}&limit=${limit}`);
-
-// Create order
-export const createOrder = async (orderData) => {
-  try {
-    const response = await api.post('/order/create', orderData); // ✅ correct
-    return response;
-  } catch (error) {
-    console.log('❌ API Error:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const fetchRelatedProducts = async (categoryId, excludeProductId) => {
-  try {
-    const response = await api.get(`/product/related/${categoryId}/${excludeProductId}`);
-    
-    return response.data;
-    
-  } catch (error) {
-    console.log('❌ API Error:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const fetchbanner = async () => {
+  export const fetchbanner = async () => {
   try {
     const response = await api.get(`/banner/all`);
     // console.log('banner=>',response.data);
@@ -44,6 +16,23 @@ export const fetchbanner = async () => {
     throw error;
   }
 };
+
+export const fetchAllproductcategorygetAll = async () => {
+  try {
+    const response = await api.get(`/category/getAll`);
+    // console.log('✅ API Response--------======', response.data);
+
+    if (response.data.categories) {
+      return response.data.categories;
+    }
+
+    return [];
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const fetchbrands = async () => {
   try {
     const response = await api.get(`/brand/get-all`);
@@ -55,10 +44,64 @@ export const fetchbrands = async () => {
     throw error;
   }
 };
-export const fetchbrandproduct = async (brand) => {
+
+export const fetchbrandproduct = async (brand, page = 1, limit = 10) => {
   try {
-    const response = await api.get(`/search/filter/${brand}`);
-    // console.log('brand=>',response.data);
+    const response = await api.get(`/search/filter/${brand}?page=${page}&limit=${limit}`);
+    // console.log('brand=> ......', response.data);
+    return response.data;  
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const createOrder = async (orderData) => {
+  try {
+    const response = await api.post('/order/create', orderData); 
+    // console.log('BestSellers adeel========', response.data);
+    return response;
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+export const createreview = async (productSlug, reviewerId,payload) => {
+  // console.log('📦 createreview called', { productSlug, reviewerId });
+
+  try {
+    const response = await api.post(
+      `/review/create/${productSlug}/${reviewerId}`
+      ,payload
+    );
+    // console.log('✅ Review submitted. Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const fetchproductReview = async (slug) => {
+  // console.log('📥 Fetching reviews for:', slug); 
+
+  try {
+    const response = await api.get(`/review/${slug}`);
+    // console.log('✅ Reviews fetched:', response.data);
+
+    return response.data;
+  } catch (error) {
+    console.log('❌ API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+export const fetchRelatedProducts = async (categoryId, excludeProductId) => {
+  try {
+    const response = await api.get(`/product/related/${categoryId}/${excludeProductId}`);
+    // console.log('fetchRelatedProducts====>',response.data )
     return response.data;
     
   } catch (error) {
@@ -66,20 +109,24 @@ export const fetchbrandproduct = async (brand) => {
     throw error;
   }
 };
-export const fetchProductsByCategory = async (categoryName) => {
+
+
+
+
+export const fetchProductsByCategory = async (categoryName, page = 1, limit = 10) => {
   try {
-    // console.log("API request categoryName adeel:", categoryName);
     const response = await api.get(`/search/filter/category`, {
-      params: { categoryName },
+      params: { categoryName, page, limit },
     });
     // console.log('API FULL Response:', response.data);
 
-    return response.data; 
+    return response.data;  
   } catch (error) {
     console.log('❌ API Error (category):', error.response?.data || error.message);
     throw error;
   }
 };
+
 
 export const fetchProductsByslug = async (slug) => {
   try {
@@ -97,93 +144,37 @@ export const fetchProductsByslug = async (slug) => {
 };
 
 
-export const fetchAllTrendingProducts = async () => {
+export const fetchTrendingProducts = async (page = 1, limit = 10) => {
   try {
-    // Pehle page fetch karen taake totalPages mil jaye
-    const firstResponse = await api.get('/product/featured', { params: { page: 1 } });
-    const data = firstResponse.data;
-
-    if (!data.success) return [];
-
-    let allProducts = data.products || [];
-    const totalPages = data.totalPages || 1;
-
-    // Agar sirf ek page hai to wapas de do
-    if (totalPages <= 1) {
-      return allProducts;
-    }
-
-    // Baaki pages bhi fetch karo
-    const promises = [];
-
-    for (let page = 2; page <= totalPages; page++) {
-      promises.push(api.get('/product/featured', { params: { page } }));
-    }
-
-    const responses = await Promise.all(promises);
-
-    // Har response se products nikal ke allProducts mein add karo
-    responses.forEach(res => {
-      if (res.data && res.data.products) {
-        allProducts = allProducts.concat(res.data.products);
-      }
-    });
-
-    return allProducts;
+    const res = await api.get('/product/featured', { params: { page, limit } });
+    return res.data;
   } catch (error) {
-    console.log('❌ API Error fetching all trending products:', error.message);
-    throw error;
-  }
-};
-export const fetchAllproductnewarrival = async () => {
-  try {
-    // Pehle page fetch karen taake totalPages mil jaye
-    const firstResponse = await api.get('/product//new-arrivals', { params: { page: 1 } });
-    const data = firstResponse.data;
-
-    if (!data.success) return [];
-
-    let allProducts = data.products || [];
-    const totalPages = data.totalPages || 1;
-
-    // Agar sirf ek page hai to wapas de do
-    if (totalPages <= 1) {
-      return allProducts;
-    }
-
-    // Baaki pages bhi fetch karo
-    const promises = [];
-
-    for (let page = 2; page <= totalPages; page++) {
-      promises.push(api.get('/product/featured', { params: { page } }));
-    }
-
-    const responses = await Promise.all(promises);
-
-    // Har response se products nikal ke allProducts mein add karo
-    responses.forEach(res => {
-      if (res.data && res.data.products) {
-        allProducts = allProducts.concat(res.data.products);
-      }
-    });
-
-    return allProducts;
-  } catch (error) {
-    console.log('❌ API Error fetching all trending products:', error.message);
+    console.log('❌ API Error fetching trending products:', error.message);
     throw error;
   }
 };
 
-export const fetchAllproductcategorygetAll = async () => {
+
+export const fetchNewArrivals = async (page = 1, limit = 10) => {
   try {
-    const response = await api.get(`/category/getAll`);
-    // console.log('✅ API Response--------======', response.data);
+    const response = await api.get('/product/new-arrivals', {
+      params: { page, limit },
+    });
+    // console.log('fetchNewArrivals adeel========', response.data);
+    return response.data; 
+  } catch (error) {
+    console.error('❌ API Error:', error.message);
+    throw error;
+  }
+};
 
-    if (response.data.categories) {
-      return response.data.categories;
-    }
 
-    return [];
+
+export const fetchBestSellers = async (page = 1, limit = 10) => {
+  try {
+    const response = await api.get(`/product/best-sellers?page=${page}&limit=${limit}`);
+    // console.log('BestSellers adeel========', response.data);
+    return response.data; 
   } catch (error) {
     console.log('❌ API Error:', error.response?.data || error.message);
     throw error;

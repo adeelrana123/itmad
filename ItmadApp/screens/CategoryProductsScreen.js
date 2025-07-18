@@ -16,6 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductsByCategory } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
+import Pagination from '../components/Pagination';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 30) / 2;
@@ -26,14 +27,19 @@ const CategoryProductsScreen = () => {
 
   const { categoryId, categorySlug, categoryName } = route.params || {};
   
-  console.log('CategoryScreen → categoryName:', categoryName ,categorySlug);
+  // console.log('CategoryScreen → categoryName:', categoryName ,categorySlug);
 // console.log('object',route.params)
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+ const PAGE_SIZE = 8;
+ const onPageChange = (newPage) => {
+      setPage(newPage);
+    };
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -52,15 +58,17 @@ const CategoryProductsScreen = () => {
         }
 
         // Call API with correct param
-        const data = await fetchProductsByCategory(param);
+        const data = await fetchProductsByCategory(param,page, PAGE_SIZE);
 
         if (data.success) {
           setAllProducts(data.products);
           setProducts(data.products);
+          setTotalPages(data.totalPages || 1);
         } else {
           setError(data.message || 'No products found');
           setAllProducts([]);
           setProducts([]);
+           setTotalPages(1);
         }
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -73,7 +81,7 @@ const CategoryProductsScreen = () => {
     };
 
     fetchProducts();
-  }, [categorySlug, categoryId]);
+  }, [categorySlug, categoryId,page]);
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -175,28 +183,28 @@ const CategoryProductsScreen = () => {
             </View>
           )}
 
-          {loading ? (
-            <ActivityIndicator
-              size="large"
-              color="orange"
-              style={styles.loadingIndicator}
-            />
-          ) : (
-            <FlatList
-              data={products}
-              keyExtractor={(item) => item._id}
-              renderItem={renderItem}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.noDataContainer}>
-                  <Text style={styles.noDataText}>No products found</Text>
-                </View>
-              }
-              contentContainerStyle={styles.gridContainer}
-              numColumns={2}
-              columnWrapperStyle={styles.columnWrapper}
-            />
-          )}
+         {loading ? (
+  <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
+) : (
+  <>
+    <FlatList
+      data={products}
+      keyExtractor={(item) => item._id}
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      ListEmptyComponent={
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>No products found</Text>
+        </View>
+      }
+      contentContainerStyle={styles.gridContainer}
+      numColumns={2}
+      columnWrapperStyle={styles.columnWrapper}
+    />
+    <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+  </>
+)}
+
         </ScrollView>
       </View>
     </View>
@@ -278,12 +286,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 150,
+    height: 170,
     backgroundColor: '#f9f9f9',
   },
   productImage: {
     width: '100%',
-    height: '100%',
+    height:170,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },

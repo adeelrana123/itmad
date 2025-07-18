@@ -13,68 +13,65 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchbrandproduct } from '../services/api'; 
+import { fetchbrandproduct } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
+import Pagination from '../components/Pagination';
 
 const BrandProductsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { brand } = route.params;
-const [allProducts, setAllProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-
+  const PAGE_SIZE = 8;
+ const onPageChange = (newPage) => {
+      setPage(newPage);
+    };
   const fetchProducts = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const data = await fetchbrandproduct(brand); 
-    if (data.success) {
-      setAllProducts(data.products); // store complete data
-      setProducts(data.products);    // visible filtered data
-    } else {
-      setAllProducts([]);
-      setProducts([]);
+      const data = await fetchbrandproduct(brand, page, PAGE_SIZE);
+      if (data.success) {
+        setProducts(data.products);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Failed to load products. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    setError('Failed to load products. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchProducts();
-  }, [brand]);
-  
-const handleSearch = () => {
-  const query = searchQuery.trim().toLowerCase();
+  }, [brand, page]);
 
-  if (!query) {
-    setProducts(allProducts); 
-    return;
-  }
+  const handleSearch = () => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return fetchProducts();
 
-  const filtered = allProducts.filter((item) => {
-    const titleMatch = item.title?.toLowerCase().includes(query);
-    const categoryMatch = item.category?.name?.toLowerCase().includes(query);
-    return titleMatch || categoryMatch;
-  });
+    const filtered = products.filter((item) => {
+      const titleMatch = item.title?.toLowerCase().includes(query);
+      const categoryMatch = item.category?.name?.toLowerCase().includes(query);
+      return titleMatch || categoryMatch;
+    });
 
-  setProducts(filtered);
-};
-
+    setProducts(filtered);
+  };
 
   const renderProductImage = (item) => {
-    const imageUri =
-      item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
+    const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
 
     if (!imageUri) {
       return (
@@ -106,7 +103,6 @@ const handleSearch = () => {
       }
       activeOpacity={0.8}
     >
-     
       <View style={styles.imageContainer}>{renderProductImage(item)}</View>
       <View style={styles.productInfoContainer}>
         <View style={styles.priceContainer}>
@@ -126,34 +122,27 @@ const handleSearch = () => {
   );
 
   return (
-    <View style={{flex:1}}>
-     <Header title={brand.toUpperCase() } />
+    <View style={{ flex: 1 }}>
+      <Header title={brand.toUpperCase()} />
 
-       <View style={styles.container}>
-
-      
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="Search for products..."
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-          style={styles.searchInput}
-          onSubmitEditing={handleSearch}
-          placeholderTextColor="#999"
-          clearButtonMode="while-editing"
-          underlineColorAndroid="transparent"
-        />
-        <TouchableOpacity
-          style={styles.searchIconButton}
-          onPress={handleSearch}
-        >
-          <Icon name="search" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView>
-        <View style={styles.sectionHeader}>
-        
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Search for products..."
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+            style={styles.searchInput}
+            onSubmitEditing={handleSearch}
+            placeholderTextColor="#999"
+            clearButtonMode="while-editing"
+            underlineColorAndroid="transparent"
+          />
+          <TouchableOpacity
+            style={styles.searchIconButton}
+            onPress={handleSearch}
+          >
+            <Icon name="search" size={20} color="white" />
+          </TouchableOpacity>
         </View>
 
         {error && (
@@ -169,29 +158,32 @@ const handleSearch = () => {
             style={styles.loadingIndicator}
           />
         ) : (
-          <FlatList
-            data={products}
-            keyExtractor={(item) => item._id}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.noDataContainer}>
-                <Text style={styles.noDataText}>No products found</Text>
-              </View>
-            }
-            contentContainerStyle={styles.gridContainer}
-            numColumns={2}
-            columnWrapperStyle={styles.columnWrapper}
-          />
+          <>
+            <FlatList
+              data={products}
+              keyExtractor={(item) => item._id}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.noDataContainer}>
+                  <Text style={styles.noDataText}>No products found</Text>
+                </View>
+              }
+              contentContainerStyle={styles.gridContainer}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+            />
+            <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+          </>
         )}
-      </ScrollView>
+      </View>
     </View>
-     </View>
   );
 };
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 30) / 2;
+
 
 const styles = StyleSheet.create({
   container: {
@@ -201,7 +193,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     paddingHorizontal: 10,
-    paddingTop:10,
+    // paddingTop:5,
     alignItems: 'center',
     backgroundColor: '#fff',
     ...Platform.select({
@@ -263,6 +255,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 10,
     overflow: 'hidden',
+    marginTop:5,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -277,7 +270,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 150,
+    height: 160,
     backgroundColor: '#f9f9f9',
   },
   productImage: {
@@ -350,9 +343,8 @@ brandTitleText: {
   fontWeight: 'bold',
   color: '#FFB727', 
   textTransform: 'uppercase',
- 
-
 },
+
 });
 
 export default BrandProductsScreen;

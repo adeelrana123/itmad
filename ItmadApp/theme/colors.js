@@ -1,5 +1,5 @@
 const appTheme = {
-  light: {
+ light: {
     background: '#ffffff',
     text: '#000000',
     red: '#FF3B30',
@@ -9,34 +9,33 @@ const appTheme = {
     black: '#000000',
     borderColor: '#ddd',
     placeholderText: '#999999',
-header:'#FF6B00',
-    // Additional colors
-    cardBackground: '#f9f9f9',       
-    mutedText: '#666666',             
-    shadowColor: '#00000033',        
-    iconColor: '#444444',            
-    buttonBackground: '#FF6B00',     
-    buttonText: '#ffffff',            
-  },
-  dark: {
-    background: '#121212',
-    text: '#ffffff',
-    red: '#FF453A',
-    blue: '#0A84FF',
-    green: '#30D158',
-    white: '#ffffff',
-    black: '#000000',
-    borderColor: '#333',
-    placeholderText: '#cccccc',
-header:'#FF6B00',
-    // Additional colors
-    cardBackground: '#1E1E1E',
-    mutedText: '#aaaaaa',
-    shadowColor: '#00000099',
-    iconColor: '#dddddd',
+    header: '#FF6B00',
+    cardBackground: '#f9f9f9',
+    mutedText: '#666666',
+    shadowColor: '#00000033',
+    iconColor: '#444444',
     buttonBackground: '#FF6B00',
     buttonText: '#ffffff',
   },
+//   dark: {
+//     background: '#121212',
+//     text: '#ffffff',
+//     red: '#FF453A',
+//     blue: '#0A84FF',
+//     green: '#30D158',
+//     white: '#ffffff',
+//     black: '#000000',
+//     borderColor: '#333',
+//     placeholderText: '#cccccc',
+// header:'#FF6B00',
+//     // Additional colors
+//     cardBackground: '#1E1E1E',
+//     mutedText: '#aaaaaa',
+//     shadowColor: '#00000099',
+//     iconColor: '#dddddd',
+//     buttonBackground: '#FF6B00',
+//     buttonText: '#ffffff',
+//   },
 };
 
 export default appTheme;
