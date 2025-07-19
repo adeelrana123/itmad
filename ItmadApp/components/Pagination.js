@@ -19,11 +19,6 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
     <Text style={[styles.text, page === 1 && styles.disabledText]}>Prev</Text>
   </View>
 </TouchableOpacity>
-
-      {/* <Text style={styles.pageInfo}>
-        Page {page} of {totalPages}
-      </Text> */}
-
       <TouchableOpacity
         disabled={page === totalPages}
         onPress={() => onPageChange(page + 1)}
@@ -34,7 +29,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
          <Ionicons
   name="chevron-forward"
   size={18}
-  color={page === totalPages ? '#ccc' : 'white'} // Correct condition
+  color={page === totalPages ? '#ccc' : 'white'} 
   style={{ marginLeft: 2 }}
 />
         </View>

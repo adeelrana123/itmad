@@ -19,7 +19,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import { fetchProductsByCategory } from '../services/api';
 import Pagination from '../components/Pagination';
-
+// import Icon from 'react-native-vector-icons/FontAwesome';
 const   CategoryScreen = () => {
   const PAGE_SIZE = 10;
   const route = useRoute();
@@ -34,6 +34,7 @@ const [allProducts, setAllProducts] = useState([]);
  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // console.log("object",  products)
   const onPageChange = (newPage) => {
       setPage(newPage);
     };
@@ -87,10 +88,28 @@ const handleSearch = (query) => {
 
   setProducts(filtered);
 };
+const StarRating = ({ rating }) => {
+  const maxStars = 5;
+  const stars = [];
 
+  for (let i = 1; i <= maxStars; i++) {
+    stars.push(
+      <Icon
+        key={i}
+        name="star"
+        size={16}
+        color={i <= rating ? '#FFD700' : '#CCCCCC'}  // yellow or gray
+        style={{ marginRight: 2 }}
+      />
+    );
+  }
+
+  return <View style={{ flexDirection: 'row' }}>{stars}</View>;
+};
 
 
   const renderProductImage = (item) => {
+    
     const imageUri =
       item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
 
@@ -111,7 +130,15 @@ const handleSearch = (query) => {
     );
   };
 
-  const renderItem = ({ item }) => (
+ const renderItem = ({ item }) => {
+  const reviewsCount = item.reviews ? item.reviews.length : 0;
+
+  // Calculate average rating (or max rating if you want)
+  const avgRating = reviewsCount > 0
+    ? item.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
+    : 0;
+
+  return (
     <TouchableOpacity
       style={styles.productCard}
       onPress={() =>
@@ -124,24 +151,31 @@ const handleSearch = (query) => {
       }
       activeOpacity={0.8}
     >
-     
       <View style={styles.imageContainer}>{renderProductImage(item)}</View>
       <View style={styles.productInfoContainer}>
-        <View style={styles.priceContainer}>
+        {/* <View style={styles.priceContainer}>
           {item.price > item.salePrice && (
             <Text style={styles.originalPrice}>Rs. {item.price}</Text>
           )}
           <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
-        </View>
+        </View> */}
         <Text style={styles.productName} numberOfLines={1}>
           {item.title}
         </Text>
         <Text style={styles.productCategory} numberOfLines={1}>
           {item.category?.name}
         </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+          <StarRating rating={Math.round(avgRating)} />
+          <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
+            {reviewsCount > 0 ? `(${reviewsCount})` : ''}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
+};
+
 
 return (
   <View style={{ flex: 1 }}>

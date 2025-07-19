@@ -99,15 +99,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     alignItems: 'center',
+    height:110
   },
   image: {
     width: '100%',
-    height: 100,
+    height: 90,
     resizeMode: 'cover',
   },
   title: {
     marginTop: 3,
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
     paddingHorizontal: 5,

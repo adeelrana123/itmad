@@ -25,6 +25,7 @@ const NewArrivals = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   //  console.log('projuct',products)
   const onPageChange = (newPage) => {
     setPage(newPage);
@@ -59,6 +60,7 @@ const StarRating = ({ rating }) => {
         const data = await fetchNewArrivals(page, PAGE_SIZE);
         setProducts(data.products || []);
         setTotalPages(data.totalPages || 1);
+        setTotalProducts(data.totalProducts || 0);
       } catch (err) {
         console.log('Failed to load new arrivals:', err);
       } finally {
@@ -129,7 +131,10 @@ const minRating = reviewsCount > 0
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>New Arrivals</Text>
+      {/* <Text style={styles.heading}>New Arrivals</Text> */}
+              <Text style={styles.heading}>New Arrivals ({totalProducts})</Text>
+             
+           
       {loading ? (
         <ActivityIndicator size="small" color="orange" />
       ) : products.length === 0 ? (
@@ -153,14 +158,7 @@ const minRating = reviewsCount > 0
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    paddingHorizontal: 10,
-    marginBottom: 8,
-    color: '#FF9800',
+  flex:1
   },
   card: {
     width: cardWidth,
@@ -195,10 +193,9 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   productCategory: {
-    fontSize: 12,
-    marginBottom: 4,
-    fontWeight: '500',
+    fontSize: 10,
     color: '#666',
+    marginTop: 2,
   },
   productPrice: {
     fontWeight: 'bold',
@@ -220,6 +217,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
     paddingVertical: 20,
+  },
+   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    // color: '#FFB727',
+      paddingHorizontal: 15,
+      marginBottom:10,
+    color: '#FF9800',
+  },
+  productCount: {
+    fontSize: 12,
+    color: '#666',
   },
 });
 

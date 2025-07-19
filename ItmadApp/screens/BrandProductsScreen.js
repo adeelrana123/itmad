@@ -56,6 +56,24 @@ const BrandProductsScreen = () => {
   useEffect(() => {
     fetchProducts();
   }, [brand, page]);
+  const StarRating = ({ rating }) => {
+    const maxStars = 5;
+    const stars = [];
+  
+    for (let i = 1; i <= maxStars; i++) {
+      stars.push(
+        <Icon
+          key={i}
+          name="star"
+          size={16}
+          color={i <= rating ? '#FFD700' : '#CCCCCC'}  // yellow or gray
+          style={{ marginRight: 2 }}
+        />
+      );
+    }
+  
+    return <View style={{ flexDirection: 'row' }}>{stars}</View>;
+  };
 
   const handleSearch = () => {
     const query = searchQuery.trim().toLowerCase();
@@ -89,8 +107,13 @@ const BrandProductsScreen = () => {
       />
     );
   };
+const renderItem = ({ item }) => {
+  const reviewsCount = item.reviews ? item.reviews.length : 0;
+  const avgRating = reviewsCount > 0
+    ? item.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
+    : 0;
 
-  const renderItem = ({ item }) => (
+  return (
     <TouchableOpacity
       style={styles.productCard}
       onPress={() =>
@@ -105,21 +128,23 @@ const BrandProductsScreen = () => {
     >
       <View style={styles.imageContainer}>{renderProductImage(item)}</View>
       <View style={styles.productInfoContainer}>
-        <View style={styles.priceContainer}>
-          {item.price > item.salePrice && (
-            <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-          )}
-          <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
-        </View>
         <Text style={styles.productName} numberOfLines={1}>
           {item.title}
         </Text>
         <Text style={styles.productCategory} numberOfLines={1}>
           {item.category?.name}
         </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+          <StarRating rating={Math.round(avgRating)} />
+          <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
+            {reviewsCount > 0 ? `(${reviewsCount})` : ''}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
+};
+
 
   return (
     <View style={{ flex: 1 }}>

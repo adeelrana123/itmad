@@ -158,6 +158,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold', marginLeft: 5 },
+  
+  variantImage: {
+  width: 40,
+  height: 40,
+  marginBottom: 4,
+},
+
+variantText: {
+  fontSize: 12,
+  textAlign: 'center',
+}
 });
 
 export default styles;

@@ -155,34 +155,42 @@ useEffect(() => {
           });
 
           return (
-            <TouchableOpacity
-              key={value._id}
-              style={[
-                styles.variantItem,
-                isSelected && styles.selectedVariantItem
-              ]}
-              onPress={() => {
-                setSelectedVariantValues(prev => ({
-                  ...prev,
-                  [item._id]: value._id,
-                }));
+           <TouchableOpacity
+  key={value._id}
+  style={[
+    styles.variantItem,
+    isSelected && styles.selectedVariantItem
+  ]}
+  onPress={() => {
+    setSelectedVariantValues(prev => ({
+      ...prev,
+      [item._id]: value._id,
+    }));
 
-                if (index !== -1) {
-                  setCurrentImageIndex(index);
-                } else if (value.image) {
-                  const updatedArray = [...imageArray, value.image];
-                  setImageArray(updatedArray);
-                  setCurrentImageIndex(updatedArray.length - 1);
-                }
-              }}
-            >
-              {value.image && (
-                <Image source={{ uri: value.image }} style={styles.variantImage} />
-              )}
-              <Text style={[styles.variantText, isSelected && { fontWeight: 'bold', color: 'green' }]}>
-                {value.value} {isSelected ? '✔️' : ''}
-              </Text>
-            </TouchableOpacity>
+    if (index !== -1) {
+      setCurrentImageIndex(index);
+    } else if (value.image) {
+      const updatedArray = [...imageArray, value.image];
+      setImageArray(updatedArray);
+      setCurrentImageIndex(updatedArray.length - 1);
+    }
+  }}
+>
+  <View style={{ alignItems: 'center' }}>
+    {value.image && (
+      <Image source={{ uri: value.image }} style={styles.variantImage} />
+    )}
+    <Text
+      style={[
+        styles.variantText,
+        isSelected && { fontWeight: 'bold', color: 'green' }
+      ]}
+    >
+      {value.value} {isSelected ? '✔️' : ''}
+    </Text>
+  </View>
+</TouchableOpacity>
+
           );
         })}
 
@@ -381,12 +389,6 @@ useEffect(() => {
     />
   </>
 )}
-
-
-
-
-
-
 
           <View style={styles.related}>
             <Text style={styles.textrelated}>Related Products</Text>

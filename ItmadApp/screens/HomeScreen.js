@@ -29,46 +29,53 @@ const HomeScreen = () => {
   const [user, setUser] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [allBestSellers, setAllBestSellers] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     const name = await AsyncStorage.getItem('username');
-  //     const email = await AsyncStorage.getItem('email');
-  //     const avatarUri = await AsyncStorage.getItem('avatar');
-
-  //     if (name && email) {
-  //       setUser({ name, email });
-  //       setAvatar(avatarUri);
-  //     } else {
-  //       setUser(null);
-  //     }
-  //   };
-  //   fetchUserInfo();
-  // }, []);
-
-useEffect(() => {
-  setLoading(true);
-  fetchBestSellers(1, 50)
-    .then(products => {
-      if (searchQuery) {
-        const filtered = products.filter(item =>
-          item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setFilteredProducts(filtered);
-      } else {
-        setFilteredProducts(products); 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchBestSellers(1, 100);
+        setAllBestSellers(data.products || []);
+      } catch (err) {
+        console.log('❌ Error fetching best sellers:', err?.message || err);
       }
       setLoading(false);
-    })
-    .catch(err => {
-      console.log('❌ API Error:', err?.response?.data || err.message || err);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      setFilteredProducts([]);
+      setHasSearched(false);
+      return;
+    }
+
+    setLoading(true);
+    setHasSearched(true);
+
+    const timer = setTimeout(() => {
+      const filtered = allBestSellers.filter(item => {
+        const title = item.title?.toLowerCase() ?? '';
+        const brand = item.brand?.name?.toLowerCase() ?? '';
+        const category = item.category?.name?.toLowerCase() ?? '';
+
+        return (
+          (title && title.includes(query)) ||
+          (brand && brand.includes(query)) ||
+          (category && category.includes(query))
+        );
+      });
+
+      setFilteredProducts(filtered);
       setLoading(false);
-    });
-}, [searchQuery]);
+    }, 300);
 
-
+    return () => clearTimeout(timer);
+  }, [searchQuery, allBestSellers]);
 
   const handleSearch = () => {
     const trimmed = searchQuery.trim();
@@ -77,11 +84,11 @@ useEffect(() => {
   };
 
   const styles = useMemo(() => StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.background },
+    container: { flex: 1, backgroundColor: theme.background, marginTop: 10 },
     searchContainer: {
       flexDirection: 'row',
       paddingHorizontal: 10,
-      paddingVertical:5,
+      paddingVertical: 5,
       alignItems: 'center',
       position: 'relative',
       backgroundColor: '#fff',
@@ -125,7 +132,7 @@ useEffect(() => {
       borderColor: theme.borderColor,
     },
     avatarWrapper: { marginRight: 10 },
-    avatarImage: { width: 50, height: 25, borderRadius:10 },
+    avatarImage: { width: 50, height: 25, borderRadius: 10 },
     userName: { fontSize: 20, fontWeight: 'bold', color: theme.white },
     userEmail: { fontSize: 12, color: theme.white },
     wattsupButtonWrapper: {
@@ -135,49 +142,28 @@ useEffect(() => {
       zIndex: 10,
     },
     logo: {
-  width: 60,
-  height: 40,
-  marginRight: 10,
-},
+      width: 60,
+      height: 40,
+      marginRight: 10,
+    },
+    noResults: {
+      textAlign: 'center',
+      marginTop: 20,
+      fontSize: 16,
+      color: theme.text,
+    },
   }), [theme]);
 
   return (
     <View style={styles.container}>
-      {/* {user && (
-        <View style={styles.userInfoContainer}>
-          <View style={styles.avatarWrapper}>
-            {avatar ? (
-              <Image source={{ uri: avatar }} style={styles.avatarImage} />
-            ) : (
-              <Icon name="person-circle-outline" size={50} color="#999" />
-            )}
-          </View>
-          <View>
-            <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
-          </View>
-        </View>
-      )} */}
-
-       <View style={styles.userInfoContainer}>
-         <View style={styles.avatarWrapper}>
-  <Image source={require('../assets/etimad.png')} style={styles.avatarImage} />
-</View>
-
-          <View>
-            <Text style={styles.userName}>Welcome to Etimad Mart</Text>
-          </View>
-        </View>
-
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search for products..."
           value={searchQuery}
-         onChangeText={text => {
-  setSearchQuery(text);
-  setHasSearched(!!text.trim());
-  
-}}
+          onChangeText={text => {
+            setSearchQuery(text);
+            setHasSearched(!!text.trim());
+          }}
           style={styles.searchInput}
           onSubmitEditing={handleSearch}
           placeholderTextColor={theme.placeholderText}
@@ -193,40 +179,47 @@ useEffect(() => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView>
-        <View style={{ height: 110 }}>
-          <BannerListScreen />
-        </View>
-        <View style={{ height: 180 }}>
-          <AllCategories />
-        </View>
-        <View style={{ height: 120 }}>
-          <BrandsList />
-        </View>
-
-       {searchQuery ? (
-  loading ? (
-    <ActivityIndicator size="large" color="orange" style={{ marginVertical: 20 }} />
-  ) : filteredProducts.length > 0 ? (
-    <BestSellers products={filteredProducts} loading={loading} />
+     <ScrollView>
+  {loading ? (
+    <ActivityIndicator size="large" color="orange" />
   ) : (
-    <View style={{ padding: 20, alignItems: 'center' }}>
-      <Text style={{ fontSize: 16, color: '#888' }}>No products found.</Text>
-    </View>
-  )
-) : (
-  <>
-    <View style={{ height: 220 }}>
-      <TrendingProductsPaginated />
-    </View>
-    <View style={{ height: 240 }}>
-      <NewArrivals />
-    </View>
-    <BestSellers products={filteredProducts} loading={loading} />
-  </>
-)}
-
-      </ScrollView>
+    <>
+      {searchQuery.trim() ? (
+        // When searching - only show search results
+        <>
+          {filteredProducts.length > 0 ? (
+            <BestSellers 
+              products={filteredProducts} 
+              loading={false} 
+              title="Search Results"
+            />
+          ) : (
+            <Text style={styles.noResults}>
+              No products found matching "{searchQuery}"
+            </Text>
+          )}
+        </>
+      ) : (
+        // When not searching - show all regular content
+        <>
+          <BannerListScreen />
+          <AllCategories />
+          <View style={{height:140}}>
+<BrandsList />
+          </View>
+          
+          <TrendingProductsPaginated />
+          <NewArrivals />
+          <BestSellers 
+            products={allBestSellers} 
+            loading={false} 
+            title="Best Sellers"
+          />
+        </>
+      )}
+    </>
+  )}
+</ScrollView>
 
       <View style={styles.wattsupButtonWrapper}>
         <Wattsup />

@@ -12,57 +12,46 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { fetchBestSellers } from '../services/api';
 import Pagination from './Pagination';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 30) / 2;
-  const PAGE_SIZE = 10;
-const BestSellers = () => {
+const PAGE_SIZE = 10;
+
+const BestSellers = ({ products = [], loading = false, title = "Best Sellers" }) => {
   const navigation = useNavigation();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  // console.log('projuct',products)
- const onPageChange = (newPage) => {
-      setPage(newPage);
-    };
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchBestSellers(page, PAGE_SIZE);
-        setProducts(response.products);
-        setTotalPages(response.totalPages);
-      } catch (error) {
-        console.error('Error fetching best sellers:', error);
-      }
-      setLoading(false);
-    };
 
-    loadProducts();
-  }, [page]);
+  const totalProducts = products.length;
+  const totalPages = Math.ceil(totalProducts / PAGE_SIZE);
 
- 
-const StarRating = ({ rating }) => {
-  const maxStars = 5;
-  const stars = [];
+  const paginatedProducts = products.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
-  for (let i = 1; i <= maxStars; i++) {
-    stars.push(
-      <Icon
-        key={i}
-        name="star"
-        size={16}
-        color={i <= rating ? '#FFD700' : '#CCCCCC'}  // yellow or gray
-        style={{ marginRight: 2 }}
-      />
-    );
-  }
+  const onPageChange = (newPage) => {
+    setPage(newPage);
+  };
 
-  return <View style={{ flexDirection: 'row' }}>{stars}</View>;
-};
+  const StarRating = ({ rating }) => {
+    const maxStars = 5;
+    const stars = [];
+
+    for (let i = 1; i <= maxStars; i++) {
+      stars.push(
+        <Icon
+          key={i}
+          name="star"
+          size={16}
+          color={i <= rating ? '#FFD700' : '#CCCCCC'}
+          style={{ marginRight: 2 }}
+        />
+      );
+    }
+
+    return <View style={{ flexDirection: 'row' }}>{stars}</View>;
+  };
 
   const renderProductImage = (item) => {
     const imageUri = item.variants?.[0]?.values?.[0]?.image || item.images?.[0];
@@ -93,60 +82,56 @@ const StarRating = ({ rating }) => {
     );
   };
 
-const renderProductCard = ({ item }) => {
- const reviewsCount = item.reviews?.length || 0;
-  const minRating = reviewsCount > 0
-    ? Math.min(...item.reviews.map(r => r.rating))
-    : 0;
+  const renderProductCard = ({ item }) => {
+    const reviewsCount = item.reviews?.length || 0;
+    const minRating = reviewsCount > 0
+      ? Math.min(...item.reviews.map(r => r.rating))
+      : 0;
 
-  return (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() =>
-        navigation.navigate('Detail', {
-          product: {
-            ...item,
-            userId: item.creator || 'fallback-id',
-          },
-          slug: item.slug,
-        })
-      }
-      activeOpacity={0.8}
-    >
-      <View style={styles.imageContainer}>{renderProductImage(item)}</View>
-      <View style={styles.productInfoContainer}>
-        <View style={styles.priceContainer}>
-          {item.price > item.salePrice && (
-            <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-          )}
-          <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
-        </View>
-        <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
-       
-        <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
+    return (
+      <TouchableOpacity
+        style={styles.productCard}
+        onPress={() =>
+          navigation.navigate('Detail', {
+            product: {
+              ...item,
+              userId: item.creator || 'fallback-id',
+            },
+            slug: item.slug,
+          })
+        }
+        activeOpacity={0.8}
+      >
+        <View style={styles.imageContainer}>{renderProductImage(item)}</View>
+        <View style={styles.productInfoContainer}>
+          <View style={styles.priceContainer}>
+            {item.price > item.salePrice && (
+              <Text style={styles.originalPrice}>Rs. {item.price}</Text>
+            )}
+            <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
+          </View>
+          <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
-          <StarRating rating={minRating} />
-         <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
-{reviewsCount > 0 ? `(${reviewsCount})` : ''}
-</Text>
+            <StarRating rating={minRating} />
+            <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
+              {reviewsCount > 0 ? `(${reviewsCount})` : ''}
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Best Sellers</Text>
-      </View>
+    <View style={{flex:1}}>
+      <Text style={styles.heading}>{title} ({totalProducts})</Text>
       {loading ? (
         <ActivityIndicator size="large" color="orange" style={styles.loadingIndicator} />
       ) : (
         <>
           <FlatList
-            data={products}
+            data={paginatedProducts}
             keyExtractor={(item) => item._id}
             numColumns={2}
             contentContainerStyle={styles.gridContainer}
@@ -159,13 +144,12 @@ const renderProductCard = ({ item }) => {
             }
             showsVerticalScrollIndicator={false}
           />
-            <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+          <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
         </>
       )}
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
@@ -231,15 +215,14 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
     color: '#333',
   },
   productCategory: {
-    fontSize: 12,
-    marginBottom: 4,
-    fontWeight: '500',
+     fontSize: 10,
     color: '#666',
+    marginTop: 2,
   },
   productPrice: {
     fontWeight: 'bold',
@@ -274,8 +257,8 @@ const styles = StyleSheet.create({
 
   freeShippingBadge: {
     position: 'absolute',
-    top: 3,
-    right: 3,
+    top: 1,
+    right: 1,
     backgroundColor: '#FFB727',
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -294,6 +277,25 @@ const styles = StyleSheet.create({
     color:'black',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    // color: '#FFB727',
+      paddingHorizontal: 15,
+      marginBottom:10,
+    color: '#FF9800',
+  },
+  productCount: {
+    fontSize: 12,
+    color: '#666',
   },
 });
 
