@@ -22,6 +22,8 @@ import BrandProductsScreen from '../screens/BrandProductsScreen';
 import CategoryScreen from '../screens/CategoryScreen';
 import CategoryProductsScreen from '../screens/CategoryProductsScreen';
 import MessageScreen from '../screens/MessageScreen';
+import PrivacyPolicy from '../screens/PrivacyPolicy';
+import TermsConditions from '../screens/TermsConditions';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,7 +49,9 @@ const AppNavigator = () => {
            <Stack.Screen name="BrandProducts" component={BrandProductsScreen} />
            <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
            <Stack.Screen name="CategoryProductsScreen" component={CategoryProductsScreen} />
-       
+            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+             <Stack.Screen name="TermsConditions" component={TermsConditions} />
+      
 
     </Stack.Navigator>
   );

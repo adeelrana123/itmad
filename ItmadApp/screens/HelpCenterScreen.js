@@ -16,33 +16,44 @@ const HelpCenterScreen = () => {
   const theme = useAppTheme();
 
   const handleEmailPress = () => {
-    Linking.openURL('mailto:support@etimadmart.com');
+    Linking.openURL('mailto:info@etimadmart.com');
   };
 
   const handlePhonePress = () => {
-    Linking.openURL('tel:+923001234567');
+    Linking.openURL('tel:+923071111832');
+  };
+
+  const handleWhatsAppPress = () => {
+    Linking.openURL('https://wa.me/923071111832');
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <Header title="Help Center" />
       <ScrollView contentContainerStyle={styles(theme).container}>
-        <Text style={styles(theme).heading}>Welcome to Help Center</Text>
+        <Text style={styles(theme).heading}>Contact Us</Text>
         <Text style={styles(theme).paragraph}>
-          If you have any issues with your orders, payments, or account, you can contact us through the following methods:
+          Need Help? Contact Etimad Mart
+        </Text>
+        <Text style={styles(theme).paragraph}>
+          We’re always here to support you! If you have any questions about your order, product details,
+          delivery, or returns, don’t hesitate to reach out.
         </Text>
 
+        <TouchableOpacity onPress={handleWhatsAppPress}>
+          <Text style={styles(theme).linkItem}>WhatsApp us at 0307 1111832</Text>
+        </TouchableOpacity>
+           <TouchableOpacity onPress={handlePhonePress}>
+          <Text style={styles(theme).linkItem}>📞 For  Call  0307 1111832</Text>
+        </TouchableOpacity>
+
+
         <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles(theme).linkItem}>📧 Email: support@etimadmart.com</Text>
+          <Text style={styles(theme).linkItem}>📧 Email: info@etimadmart.com</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handlePhonePress}>
-          <Text style={styles(theme).linkItem}>📞 Phone: 0308 5782560</Text>
-        </TouchableOpacity>
-
-        <Text style={styles(theme).item}>⏰ Support Hours: 9 AM – 6 PM (Mon – Sat)</Text>
         <Text style={styles(theme).paragraph}>
-          For common questions, visit our FAQ section in the app or website.
+          Our team is ready to assist you with quick and friendly support.
         </Text>
       </ScrollView>
     </View>
@@ -60,19 +71,14 @@ const styles = (theme) =>
     heading: {
       fontSize: 22,
       fontWeight: 'bold',
-      marginBottom: 15,
+      marginBottom: 10,
       color: theme.text,
     },
     paragraph: {
       fontSize: 16,
-      color: theme.mutedText,
-      marginBottom: 15,
-      lineHeight: 22,
-    },
-    item: {
-      fontSize: 16,
       color: theme.text,
-      marginBottom: 10,
+      marginBottom: 12,
+      lineHeight: 22,
     },
     linkItem: {
       fontSize: 16,

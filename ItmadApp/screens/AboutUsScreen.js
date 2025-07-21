@@ -19,17 +19,17 @@ const AboutUsScreen = () => {
       marginBottom: 15,
       color: colors.text,
     },
-    subheading: {
-      fontSize: 18,
-      fontWeight: '600',
-      marginTop: 20,
-      marginBottom: 8,
-      color: colors.text,
-    },
     paragraph: {
       fontSize: 16,
       lineHeight: 24,
       color: colors.text,
+      marginBottom: 15,
+    },
+    bullet: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: colors.text,
+      marginLeft: 10,
     },
     footerNote: {
       marginTop: 30,
@@ -47,33 +47,28 @@ const AboutUsScreen = () => {
         <Text style={styles.heading}>Welcome to Etimad Mart</Text>
 
         <Text style={styles.paragraph}>
-          Etimad Mart is your trusted destination for convenient and reliable online shopping. 
-          We aim to provide high-quality products at competitive prices, delivered right to your doorstep.
+          Welcome to Etimad Mart, your trusted online shopping destination in Pakistan.
+          We’re committed to delivering quality products at affordable prices, backed by excellent customer service.
         </Text>
 
-        <Text style={styles.subheading}>Our Mission</Text>
         <Text style={styles.paragraph}>
-          To simplify shopping for everyone across Pakistan by offering a user-friendly platform,
-          fast delivery, and excellent customer support.
+          Whether you’re looking for grooming tools, fashion wear, kitchen essentials, or home accessories,
+          we bring a wide range of products to your fingertips—all carefully selected to meet your daily needs.
+          Our goal is to provide you with a smooth, secure, and satisfying shopping experience from start to finish.
         </Text>
 
-        <Text style={styles.subheading}>What We Offer</Text>
-        <Text style={styles.paragraph}>
-          - A wide range of products including fashion, electronics, and home essentials.{"\n"}
-          - Safe and secure payments.{"\n"}
-          - Trackable orders and responsive support.{"\n"}
-          - Guest checkout without account creation.
-        </Text>
+        <Text style={styles.heading}>Why Choose Us?</Text>
+        <Text style={styles.bullet}>✅ Affordable Prices – Great value without compromising quality</Text>
+        <Text style={styles.bullet}>🚚 Nationwide Delivery – Fast and reliable shipping across Pakistan</Text>
+        <Text style={styles.bullet}>🔒 Secure Checkout – Safe payment options for your peace of mind</Text>
+        <Text style={styles.bullet}>💬 Customer Support – Reach out anytime via WhatsApp or email</Text>
 
-        <Text style={styles.subheading}>Contact Us</Text>
         <Text style={styles.paragraph}>
-          📧 Email: support@etimadmart.com{"\n"}
-          📞 Phone: +92 300 5782560{"\n"}
-          📍 Location: Lahore, Pakistan
+          We believe in building long-term trust with our customers by offering not just products—but a promise of quality and care.
         </Text>
 
         <Text style={styles.footerNote}>
-          Thank you for choosing Etimad Mart – where trust meets convenience.
+          Thank you for choosing Etimad Mart. We look forward to serving you!
         </Text>
       </ScrollView>
     </View>

@@ -16,9 +16,10 @@ const ReviewForm = ({ productSlug, reviewerId, userEmail }) => {
     const navigation = useNavigation();
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(0);
-const user= useSelector(state=>
-state.auth.user
-)
+// const user= useSelector(state=>
+// state.auth.user
+// )
+const { user, token } = useSelector((state) => state.auth);
 const useremail =user?.email
 // console.log(useremail)
 

@@ -17,94 +17,87 @@ import { logout } from '../services/authApi';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
 import { logoutredux } from '../redux/authSlice';
+
 const AccountScreen = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [avatar, setAvatar] = useState(null);
-const dispatch = useDispatch();
-const CLOUDINARY_UPLOAD_PRESET = 'etimad_avatar_upload';
-const CLOUDINARY_CLOUD_NAME = 'dzp0kj3rw';
+  const dispatch = useDispatch();
 
-const uploadToCloudinary = async (fileUri) => {
-  const formData = new FormData();
-  formData.append('file', {
-    uri: fileUri,
-    type: 'image/jpeg',
-    name: 'profile.jpg',
-  });
-  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const CLOUDINARY_UPLOAD_PRESET = 'etimad_avatar_upload';
+  const CLOUDINARY_CLOUD_NAME = 'dzp0kj3rw';
 
-  try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-      method: 'POST',
-      body: formData,
+  const uploadToCloudinary = async (fileUri) => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      type: 'image/jpeg',
+      name: 'profile.jpg',
     });
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-    const data = await response.json();
-    return data.secure_url;
-  } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    return null;
-  }
-};
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
 
-useEffect(() => {
-  const checkLogin = async () => {
-    const token = await AsyncStorage.getItem('token');
-    const name = await AsyncStorage.getItem('username');
-    const email = await AsyncStorage.getItem('email');
-
-    if (token && name && email) {
-      setUser({ name, email });
-
-      // 👇 Load avatar specific to this email
-      const avatarUri = await AsyncStorage.getItem(`avatar-${email}`);
-      if (avatarUri) setAvatar(avatarUri);
-      else setAvatar(null);
-    } else {
-      setUser(null);
-      setAvatar(null);
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      return null;
     }
-
-    setLoading(false);
   };
 
-  if (isFocused) {
-    checkLogin(); // ✅ yeh line missing thi
-  }
-}, [isFocused]);
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem('token');
+      const name = await AsyncStorage.getItem('username');
+      const email = await AsyncStorage.getItem('email');
 
+      if (token && name && email) {
+        setUser({ name, email });
+        const avatarUri = await AsyncStorage.getItem(`avatar-${email}`);
+        if (avatarUri) setAvatar(avatarUri);
+        else setAvatar(null);
+      } else {
+        setUser(null);
+        setAvatar(null);
+      }
 
+      setLoading(false);
+    };
 
+    if (isFocused) {
+      checkLogin();
+    }
+  }, [isFocused]);
 
-const pickImage = () => {
-  Alert.alert(
-    'Select Image',
-    'Choose an option',
-    [
+  const pickImage = () => {
+    Alert.alert('Select Image', 'Choose an option', [
       {
         text: 'Camera',
         onPress: () => {
-  launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
-    if (!response.didCancel && !response.errorCode) {
-      const uri = response.assets[0].uri;
-      const imageUrl = await uploadToCloudinary(uri);
-      if (imageUrl) {
-        setAvatar(imageUrl);
-        const storedEmail = await AsyncStorage.getItem('email');
-        if (storedEmail) {
-          await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
-        }
-        Alert.alert('Success', 'Profile image updated!');
-      } else {
-        Alert.alert('Upload failed', 'Unable to upload image.');
-      }
-    }
-  });
-},
-
+          launchCamera({ mediaType: 'photo', quality: 0.7 }, async (response) => {
+            if (!response.didCancel && !response.errorCode) {
+              const uri = response.assets[0].uri;
+              const imageUrl = await uploadToCloudinary(uri);
+              if (imageUrl) {
+                setAvatar(imageUrl);
+                const storedEmail = await AsyncStorage.getItem('email');
+                if (storedEmail) {
+                  await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
+                }
+                Alert.alert('Success', 'Profile image updated!');
+              } else {
+                Alert.alert('Upload failed', 'Unable to upload image.');
+              }
+            }
+          });
+        },
       },
       {
         text: 'Gallery',
@@ -115,10 +108,10 @@ const pickImage = () => {
               const imageUrl = await uploadToCloudinary(uri);
               if (imageUrl) {
                 setAvatar(imageUrl);
-               const storedEmail = await AsyncStorage.getItem('email');
-if (storedEmail) {
-  await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
-}
+                const storedEmail = await AsyncStorage.getItem('email');
+                if (storedEmail) {
+                  await AsyncStorage.setItem(`avatar-${storedEmail}`, imageUrl);
+                }
                 Alert.alert('Success', 'Profile image updated!');
               } else {
                 Alert.alert('Upload failed', 'Unable to upload image.');
@@ -127,44 +120,56 @@ if (storedEmail) {
           });
         },
       },
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-    ],
-    { cancelable: true }
-  );
-};
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      dispatch(logoutredux());
+      await AsyncStorage.multiRemove(['token', 'username', 'email']);
+      Alert.alert('Logged out successfully');
+      navigation.replace('Login');
+    } catch (err) {
+      Alert.alert('Logout failed', err.message);
+    }
+  };
 
- const handleLogout = async () => {
-  try {
-    const email = await AsyncStorage.getItem('email');
-    await logout(); // API logout
-    dispatch(logoutredux());
-await AsyncStorage.multiRemove([
-  'token',
-  'username',
-  'email',
-  // `avatar-${email}`, ❌ Don't delete this
-]);
-
-
-    Alert.alert('Logged out successfully');
-    navigation.replace('Login');
-  } catch (err) {
-    Alert.alert('Logout failed', err.message);
-  }
-};
-
-
+  // ✅ Navigation handler for menu actions
+  const handlePress = (action) => {
+    switch (action) {
+      case 'My Orders':
+        navigation.navigate('My Orders'); 
+        break;
+      case 'Help Center':
+        navigation.navigate('Help Center');
+        break;
+      case 'Settings':
+        navigation.navigate('Settings');
+        break;
+      case 'About Us':
+        navigation.navigate('About Us');
+        break;
+      case 'TermsConditions':
+        navigation.navigate('TermsConditions');
+        break;
+      case 'PrivacyPolicy':
+        navigation.navigate('PrivacyPolicy');
+        break;
+      default:
+        console.warn('Unknown action:', action);
+    }
+  };
 
   const menuItems = [
-    { title: 'My Orders', icon: 'list-alt', action: 'Orders', rightText: 'View All Orders >' },
-    // { title: 'My Message', icon: 'envelope', action: 'AdminChats' },
+    { title: 'My Orders', icon: 'list-alt', action: 'My Orders', rightText: 'View All Orders >' },
     { title: 'Help Center', icon: 'question-circle', action: 'Help Center' },
     { title: 'Settings', icon: 'cog', action: 'Settings' },
     { title: 'About Us', icon: 'info-circle', action: 'About Us' },
+    { title: 'Terms & Conditions', icon: 'file-text', action: 'TermsConditions' },
+    { title: 'Privacy Policy', icon: 'shield', action: 'PrivacyPolicy' },
+    // { title: 'Contact Us', icon: 'envelope', action: 'ContactUs' },
   ];
 
   const features = [
@@ -179,10 +184,7 @@ await AsyncStorage.multiRemove([
           <View style={styles.profileSection}>
             <TouchableOpacity onPress={pickImage} style={styles.avatar}>
               {avatar ? (
-                <Image
-                  source={{ uri: avatar }}
-                  style={{ width: 60, height: 60, borderRadius: 30 }}
-                />
+                <Image source={{ uri: avatar }} style={{ width: 60, height: 60, borderRadius: 30 }} />
               ) : (
                 <Ionicons name="person" size={40} color="black" />
               )}
@@ -190,7 +192,6 @@ await AsyncStorage.multiRemove([
                 <Ionicons name="camera" size={18} color="red" />
               </View>
             </TouchableOpacity>
-
             <View>
               <Text style={styles.username}>{user.name}</Text>
               <Text style={styles.email}>{user.email}</Text>
@@ -220,7 +221,6 @@ await AsyncStorage.multiRemove([
               <FontAwesome name={item.icon} size={20} color="#FF6B00" style={styles.menuIcon} />
               <View>
                 <Text style={styles.menuTitle}>{item.title}</Text>
-                {item.subText && <Text style={styles.menuSubText}>{item.subText}</Text>}
               </View>
             </View>
             {item.rightText && <Text style={styles.menuRightText}>{item.rightText}</Text>}
@@ -228,6 +228,7 @@ await AsyncStorage.multiRemove([
         )}
         keyExtractor={(item, index) => index.toString()}
       />
+
       {user && (
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <View style={styles.menuItemLeft}>
@@ -252,6 +253,9 @@ await AsyncStorage.multiRemove([
     </ScrollView>
   );
 };
+
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
