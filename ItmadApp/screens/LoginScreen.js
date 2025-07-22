@@ -27,8 +27,8 @@ const LoginScreen = () => {
 
 const handleLogin = async () => {
   try {
-    const data = await login(email, password); // no .data here
-    const userData = data.user;                // directly access user
+    const data = await login(email, password);
+    const userData = data.user;
 
     if (!userData) {
       Alert.alert('Login Failed', 'User data not found.');
@@ -44,9 +44,11 @@ const handleLogin = async () => {
     dispatch(loginSuccess(userData));
     Alert.alert('Login Success', `Welcome ${userData.username}`);
 
-    const redirectTo = route.params?.redirectTo;
-    navigation.replace(redirectTo || 'MainTabs');
-
+   if (route.params?.returnTo === 'Detail') {
+  navigation.replace('Detail', route.params.returnParams);
+} else {
+  navigation.replace('MainTabs');
+}
   } catch (err) {
     console.error('❌ Login Error:', err?.response?.data || err.message);
     setTimeout(() => {
@@ -54,7 +56,6 @@ const handleLogin = async () => {
     }, 100);
   }
 };
-
 
   const styles = React.useMemo(() => StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', padding: 16, backgroundColor: colors.background },

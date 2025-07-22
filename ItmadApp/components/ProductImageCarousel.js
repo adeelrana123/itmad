@@ -65,7 +65,7 @@ const ProductImageCarousel = ({
           resizeMode="contain"
         />
         {discount > 0 && (
-  <View style={[styles.discountBox, { position: 'absolute', top: 2, right: 10 }]}>
+  <View style={[styles.discountBox, { position: 'absolute', top: 1, right: 10 }]}>
     <Text style={styles.discountText}>{discount}% Save</Text>
   </View>
 )}

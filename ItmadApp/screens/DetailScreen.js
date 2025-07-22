@@ -42,6 +42,7 @@ const slug = routeSlug || product?.slug;
   const [imageArray, setImageArray] = useState(product?.images || []);
   const [activeTab, setActiveTab] = useState('');
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 const [quantity, setQuantity] = useState(1);
   const categoryId = loadedProduct?.category?._id || loadedProduct?.category?.id;
   const excludeProductId = loadedProduct?._id || loadedProduct?.id;
@@ -50,6 +51,8 @@ const [quantity, setQuantity] = useState(1);
  // const variantKey = `${loadedProduct._id}_${imageArray[currentImageIndex]}`;
 const user = useSelector(state => state.auth.user);
 //  console.log('🧑 Logged-in user:', user);
+
+
 
     const simpleSlugify = (text) =>
   text
@@ -100,6 +103,7 @@ useEffect(() => {
   };
   fetchReview();
 }, [slug]);
+
 
 
 
@@ -320,73 +324,101 @@ useEffect(() => {
 {activeTab === 'reviews' && (
   <>
     <FlatList
-      data={reviews}
+      // data={reviews}
+      data={showAllReviews ? reviews : reviews.slice(0, 3)}
       keyExtractor={(item) => item._id}
       scrollEnabled={false}
-      renderItem={({ item }) => (
-        <View style={{
-          backgroundColor: '#fff',
-          padding: 16,
-          marginVertical: 8,
-          marginHorizontal: 4,
-          borderRadius: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-        }}>
-          {/* Header */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{
-                width: 35,
-                height: 35,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: '#ccc',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: 10,
-              }}>
-                <Icon name="user" size={30} color="#555" />
-              </View>
-              <Text style={{ fontWeight: '700', fontSize: 15 }}>
-                {item.reviewerId?.username || item.email}
-              </Text>
-            </View>
-            <Text style={{ fontSize: 12, color: '#999' }}>
-              {new Date(item.createdAt).toLocaleDateString()}
-            </Text>
-          </View>
+     renderItem={({ item }) => (
+  <View
+    style={{
+      backgroundColor: '#fff',
+      padding: 16,
+      marginVertical: 8,
+      marginHorizontal: 4,
+      borderRadius: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    }}
+  >
+    {/* Top Row: Icon and Info Block */}
+    <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+      {/* User Icon */}
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: '#ccc',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginRight: 12,
+        }}
+      >
+        <Icon name="user" size={24} color="#555" />
+      </View>
 
-          {/* Rating */}
-          <View style={{ flexDirection: 'row', marginTop: 3, marginBottom: 5, marginLeft: 43 }}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Icon
-                key={star}
-                name={star <= item.rating ? 'star' : 'star-o'}
-                size={14}
-                color="#f1c40f"
-                style={{ marginRight: 2 }}
-              />
-            ))}
-          </View>
-
-          {/* Comment */}
-          <Text style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
-            {item.reviewText}
-          </Text>
+      {/* User Info */}
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+          {item.reviewerId?.username || item.email}
+        </Text>
+        <Text style={{ fontSize: 12, color: '#777', marginTop: 2 }}>
+          {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
+        <View style={{ flexDirection: 'row', marginTop: 4 }}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Icon
+              key={star}
+              name={star <= item.rating ? 'star' : 'star-o'}
+              size={14}
+              color="#f1c40f"
+              style={{ marginRight: 2 }}
+            />
+          ))}
         </View>
-      )}
+      </View>
+    </View>
+
+    {/* Review Text */}
+    <Text style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
+      {item.reviewText}
+    </Text>
+  </View>
+)}
+
       ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No reviews yet.</Text>}
     />
+    {!showAllReviews && reviews.length > 3 && (
+  <TouchableOpacity
+    onPress={() => setShowAllReviews(true)}
+    style={{
+      padding: 10,
+      alignItems: 'center',
+      marginTop: 5,
+      marginBottom: 10,
+    }}
+  >
+    <Text style={{ color: '#007bff', fontWeight: 'bold' }}>See More Reviews</Text>
+  </TouchableOpacity>
+)}
 
-    <ReviewForm
-      userEmail={user?.email}
-      productSlug={loadedProduct.slug || slug}
-      reviewerId={user?._id}
-    />
+
+  <ReviewForm
+  userEmail={user?.email}
+  productSlug={loadedProduct.slug || slug}
+  reviewerId={user?._id}
+  onRequireLogin={() => {
+    navigation.navigate('Login', {
+      returnTo: 'Detail',
+      returnParams: route.params,
+    });
+  }}
+/>
+
   </>
 )}
 

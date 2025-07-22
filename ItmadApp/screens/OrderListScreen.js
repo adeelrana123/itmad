@@ -15,7 +15,7 @@ const OrderListScreen = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const theme = useAppTheme();
-
+// console.log('object ------',orders)
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -42,54 +42,69 @@ const OrderListScreen = () => {
   }, []);
 
   const renderItem = ({ item }) => (
-    <View style={[styles(theme).orderCard]}>
-      <View style={styles(theme).section}>
-        {item.cartSummary.map((product, index) => (
-          <View key={index} style={styles(theme).productRow}>
-            <Image
-              source={{ uri: product.image }}
-              style={styles(theme).productImage}
-            />
-            <View style={{ marginLeft: 10, flex: 1 }}>
-              <Text numberOfLines={2} style={styles(theme).productTitle}>{product.title}</Text>
-              <Text style={{ color: theme.text }}>Qty: {product.count}</Text>
-              <Text style={{ color: theme.text }}>Price: Rs. {product.price}</Text>
-              <Text style={{ color: item.freeShipping ? theme.green : theme.text }}>
-                {item.freeShipping
-                  ? 'Free Shipping ✅'
-                  : `Shipping Charges: Rs. ${item.deliveryCharges || 0}`}
-              </Text>
-              <Text style={styles(theme).total}>Total: Rs. {item.totalPrice}</Text>
-            </View>
+  <View style={[styles(theme).orderCard]}>
+    <View style={styles(theme).section}>
+      {item.cartSummary.map((product, index) => (
+        <View key={index} style={styles(theme).productRow}>
+          <Image
+            source={{ uri: product.image }}
+            style={styles(theme).productImage}
+          />
+          <View style={{ marginLeft: 10, flex: 1 }}>
+            <Text numberOfLines={2} style={styles(theme).productTitle}>
+              {product.title}
+            </Text>
+            <Text style={{ color: theme.text }}>Qty: {product.count}</Text>
+            <Text style={{ color: theme.text }}>Price: Rs. {product.price}</Text>
           </View>
-        ))}
-      </View>
+        </View>
+      ))}
 
-      <View style={styles(theme).statusDateRow}>
-        <Text style={styles(theme).status}>Status: {item.status || 'Pending'}</Text>
-        <Text style={styles(theme).date}>
-          Date: {new Date(item.orderedAt).toLocaleDateString()}
-        </Text>
-      </View>
+     {item.deliveryCharges > 0 && (
+  <Text style={{ color: theme.text, marginTop: 5 }}>
+    Shipping Charges: Rs. {item.deliveryCharges}
+  </Text>
+)}
 
-      <View style={styles(theme).section}>
-        <Text style={styles(theme).sectionTitle}>Customer Info:</Text>
-        <Text style={styles(theme).infoText}>Name: {item.shippingAddress.firstName} {item.shippingAddress.lastName}</Text>
-        <Text style={styles(theme).infoText}>Mobile: {item.shippingAddress.mobile}</Text>
-        <Text style={styles(theme).infoText}>Email: {item.shippingAddress.email}</Text>
-        {item.shippingAddress?.apartment ? (
-          <Text style={styles(theme).infoText}>Apartment: {item.shippingAddress.apartment}</Text>
-        ) : null}
-        <Text style={styles(theme).infoText}>Address: {item.shippingAddress.streetAddress}</Text>
-        <Text style={styles(theme).infoText}>City: {item.shippingAddress.city}</Text>
-        <Text style={styles(theme).infoText}>Province: {item.shippingAddress.province}</Text>
-        {item.shippingAddress?.additionalInstructions ? (
-          <Text style={styles(theme).infoText}>Note: {item.shippingAddress.additionalInstructions}</Text>
-        ) : null}
-        <Text style={styles(theme).infoText}>Order ID: {item._id}</Text>
-      </View>
+{item.freeShipping && (
+  <Text style={{ color: theme.green, marginTop: 5 }}>
+    Free Shipping ✅
+  </Text>
+)}
+
+
+      {/* ✅ Show total only once */}
+      <Text style={styles(theme).total}>Total: Rs. {item.totalPrice}</Text>
     </View>
-  );
+
+    <View style={styles(theme).statusDateRow}>
+      <Text style={styles(theme).status}>Status: {item.status || 'Pending'}</Text>
+      <Text style={styles(theme).date}>
+        Date: {new Date(item.orderedAt).toLocaleDateString()}
+      </Text>
+    </View>
+
+    <View style={styles(theme).section}>
+      <Text style={styles(theme).sectionTitle}>Customer Info:</Text>
+      <Text style={styles(theme).infoText}>
+        Name: {item.shippingAddress.fullName || `${item.shippingAddress.firstName || ''} ${item.shippingAddress.lastName || ''}`}
+      </Text>
+      <Text style={styles(theme).infoText}>Mobile: {item.shippingAddress.mobile}</Text>
+      <Text style={styles(theme).infoText}>Email: {item.shippingAddress.email}</Text>
+      {item.shippingAddress?.apartment ? (
+        <Text style={styles(theme).infoText}>Apartment: {item.shippingAddress.apartment}</Text>
+      ) : null}
+      <Text style={styles(theme).infoText}>Address: {item.shippingAddress.streetAddress}</Text>
+      <Text style={styles(theme).infoText}>City: {item.shippingAddress.city}</Text>
+      <Text style={styles(theme).infoText}>Province: {item.shippingAddress.province}</Text>
+      {item.shippingAddress?.additionalInstructions ? (
+        <Text style={styles(theme).infoText}>Note: {item.shippingAddress.additionalInstructions}</Text>
+      ) : null}
+      <Text style={styles(theme).infoText}>Order ID: {item._id}</Text>
+    </View>
+  </View>
+);
+
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>

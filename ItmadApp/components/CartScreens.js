@@ -9,13 +9,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  decrementQuantity,
-  incrementQuantity,
-  clearCart,
-} from '../redux/cartSlice';
+import { clearCart } from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from './Header';
 import { createOrder } from '../services/api';
@@ -24,11 +21,11 @@ import { useNavigation } from '@react-navigation/native';
 const CartScreens = () => {
   const cartItems = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
-const navigation = useNavigation();
+  const navigation = useNavigation();
+
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     province: '',
     city: '',
     street: '',
@@ -43,16 +40,15 @@ const navigation = useNavigation();
   };
 
   const subtotal = cartItems.reduce(
-  (acc, item) => acc + item.salePrice * item.quantity,
-  0
-);
+    (acc, item) => acc + item.salePrice * item.quantity,
+    0
+  );
 
-const hasShipping = cartItems.some(
-  item => !item.freeShipping && item.deliveryCharges > 0
-);
+  const hasShipping = cartItems.some(
+    item => !item.freeShipping && item.deliveryCharges > 0
+  );
 
-const grandTotal = hasShipping ? subtotal + 200 : subtotal;
-
+  const grandTotal = hasShipping ? subtotal + 200 : subtotal;
 
   const handleSubmitOrder = async () => {
     if (cartItems.length === 0) {
@@ -61,8 +57,7 @@ const grandTotal = hasShipping ? subtotal + 200 : subtotal;
     }
 
     if (
-      !customerInfo.firstName ||
-      !customerInfo.lastName ||
+      !customerInfo.fullName ||
       !customerInfo.city ||
       !customerInfo.street ||
       !customerInfo.mobile
@@ -73,42 +68,35 @@ const grandTotal = hasShipping ? subtotal + 200 : subtotal;
 
     setLoading(true);
 
- const orderPayload = {
- 
-  shippingAddress: {
-    firstName: customerInfo.firstName,
-    lastName: customerInfo.lastName,
-    // province: customerInfo.province,
-    city: customerInfo.city,
-    streetAddress: customerInfo.street,
-    apartment: customerInfo.apartment,
-    mobile: customerInfo.mobile,
-    email: customerInfo.email,
-    additionalInstructions: customerInfo.note,
-  },
-
-  cartSummary: cartItems.map(item => ({
-    productId:item.id,
-    title: item.title,
-    image: item.image,
-    count: item.quantity,
-    price: item.salePrice,
-    selectedVariants: item.selectedVariants || [], 
-  })),
-
-  deliveryCharges: cartItems.reduce((acc, item) => acc + (item.deliveryCharges || 0), 0),
-  freeShipping: cartItems.every(item => item.freeShipping || item.deliveryCharges === 0),
-  totalPrice: grandTotal,
-  orderedAt: new Date().toISOString(),
-};
-
-
-
+    const orderPayload = {
+      shippingAddress: {
+        fullName: customerInfo.fullName,
+        city: customerInfo.city,
+        streetAddress: customerInfo.street,
+        apartment: customerInfo.apartment,
+        mobile: customerInfo.mobile,
+        email: customerInfo.email,
+        additionalInstructions: customerInfo.note,
+      },
+      cartSummary: cartItems.map(item => ({
+        productId: item.id,
+        title: item.title,
+        image: item.image,
+        count: item.quantity,
+        price: item.salePrice,
+        selectedVariants: item.selectedVariants || [],
+      })),
+      deliveryCharges: cartItems.some(item => !item.freeShipping && item.deliveryCharges > 0) ? 200 : 0,
+      // deliveryCharges: cartItems.reduce((acc, item) => acc + (item.deliveryCharges || 0), 0),
+      freeShipping: cartItems.every(item => item.freeShipping || item.deliveryCharges === 0),
+      totalPrice: grandTotal,
+      orderedAt: new Date().toISOString(),
+    };
 
     try {
-      console.log("🟢 Sending order...",orderPayload);
-const response = await createOrder(orderPayload);
-// console.log("✅ Order response:", response.data);
+      console.log("🟢 Sending order...", orderPayload);
+      const response = await createOrder(orderPayload);
+      console.log("✅ Order response:", response.data);
 
       Alert.alert('Success', 'Order submitted successfully!');
       dispatch(clearCart());
@@ -124,56 +112,44 @@ const response = await createOrder(orderPayload);
   return (
     <View style={styles.container}>
       <View style={styles.headerWrapper}>
-        <Header title="Checkout " />
+        <Header title="Checkout" />
       </View>
 
       <ScrollView style={styles.scrollArea}>
-        {cartItems.map(item => {
-          const itemPrice = item.salePrice;
-          const shipping = item.deliveryCharges || 0;
-          const totalPrice = itemPrice * item.quantity + shipping;
-
-          return (
-            <View key={item.id} style={styles.card}>
-              <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
-                <View style={styles.itemRow}>
-                  {item.image && (
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.thumbnail}
-                      resizeMode="cover"
-                    />
-                  )}
-                  <Text style={styles.price}> Rs:{item.salePrice}</Text>
-                </View>
-                <Text style={styles.title}>{item.title}</Text>
+        {cartItems.map(item => (
+          <View key={item.id} style={styles.card}>
+            <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+              <View style={styles.itemRow}>
+                {item.image && (
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.thumbnail}
+                    resizeMode="cover"
+                  />
+                )}
+                <Text style={styles.price}> Rs:{item.salePrice}</Text>
               </View>
+              <Text style={styles.title}>{item.title}</Text>
             </View>
-          );
-        })}
+          </View>
+        ))}
         <View style={{ padding: 15 }}>
           <Text style={styles.sectionTitle}>Your Address</Text>
 
           <TextInput
-            placeholder="First Name "
+            placeholder="Full Name"
             style={styles.input}
-            onChangeText={text => handleChange('firstName', text)}
+            onChangeText={text => handleChange('fullName', text)}
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Last Name "
-            style={styles.input}
-            onChangeText={text => handleChange('lastName', text)}
-            placeholderTextColor="#333"
-          />
-          <TextInput
-            placeholder="City "
+            placeholder="City"
             style={styles.input}
             onChangeText={text => handleChange('city', text)}
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Street Address "
+            placeholder="Street Address"
             style={styles.input}
             onChangeText={text => handleChange('street', text)}
             placeholderTextColor="#333"
@@ -185,60 +161,57 @@ const response = await createOrder(orderPayload);
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Mobile Number "
+            placeholder="Mobile Number"
             style={styles.input}
             keyboardType="phone-pad"
             onChangeText={text => handleChange('mobile', text)}
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Email Address (optional) "
+            placeholder="Email Address (optional)"
             style={styles.input}
             keyboardType="email-address"
             onChangeText={text => handleChange('email', text)}
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Additional Instructions  (optional)"
+            placeholder="Additional Instructions (optional)"
             style={[styles.input, { height: 100 }]}
             multiline
             numberOfLines={4}
             onChangeText={text => handleChange('note', text)}
-           placeholderTextColor="#333"
+            placeholderTextColor="#333"
           />
         </View>
       </ScrollView>
 
-     <View style={styles.footer}>
-  {hasShipping && (
-    <View style={styles.shippingRow}>
-      <Icon name="truck" size={16} color="#FF6B00" style={styles.icon} />
-      <Text style={styles.shipping}>Delivery Charges: Rs. 200</Text>
-    </View>
-  )}
+      <View style={styles.footer}>
+        {hasShipping ? (
+          <View style={styles.shippingRow}>
+            <Icon name="truck" size={16} color="#FF6B00" style={styles.icon} />
+            <Text style={styles.shipping}>Delivery Charges: Rs. 200</Text>
+          </View>
+        ) : (
+          <View style={styles.shippingRow}>
+            <Icon name="truck" size={16} color="green" style={styles.icon} />
+            <Text style={styles.freeShipping}>Free Delivery</Text>
+          </View>
+        )}
 
-  {!hasShipping && (
-    <View style={styles.shippingRow}>
-      <Icon name="truck" size={16} color="green" style={styles.icon} />
-      <Text style={styles.freeShipping}>Free Delivery</Text>
-    </View>
-  )}
+        <Text style={styles.grandTotal}>Grand Total: Rs. {grandTotal}</Text>
 
-  <Text style={styles.grandTotal}>Grand Total: Rs. {grandTotal}</Text>
-
-  <TouchableOpacity
-    style={styles.submitBtn}
-    onPress={handleSubmitOrder}
-    disabled={loading}
-  >
-    {loading ? (
-      <ActivityIndicator color="#fff" />
-    ) : (
-      <Text style={styles.submitText}>Place Order</Text>
-    )}
-  </TouchableOpacity>
-</View>
-
+        <TouchableOpacity
+          style={styles.submitBtn}
+          onPress={handleSubmitOrder}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitText}>Place Order</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -252,7 +225,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   card: {
     marginHorizontal: 10,
-    marginVertical:5,
+    marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
@@ -262,7 +235,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginVertical: 5,
-    justifyContent:"space-between"
+    justifyContent: 'space-between',
   },
   thumbnail: {
     width: 30,
@@ -270,50 +243,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f0f0f0',
   },
-  priceQtyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#e53935',
-  },
-  quantityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  qtyBtn: {
-    fontSize: 16,
-    paddingHorizontal: 8,
-  },
-  qtyText: {
-    marginHorizontal: 8,
-    fontSize: 16,
-  },
-  shippingDeleteRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  shippingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  freeShipping: {
-    color: 'green',
-    fontSize: 13,
-  },
-  shipping: {
-    color: '#333',
-    fontSize: 13,
-  },
-  total: {
-    marginTop: 5,
-    fontWeight: 'bold',
-    fontSize: 16,
     color: '#e53935',
   },
   title: {
@@ -348,28 +280,28 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 5,
   },
-  pickerWrapper: {
+  shippingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  freeShipping: {
+    color: 'green',
+    fontSize: 13,
+  },
+  shipping: {
+    color: '#333',
+    fontSize: 13,
+  },
+  input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 0,
     marginBottom: 10,
-    overflow: 'hidden',
+    fontSize: 16,
+    height: 50,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
   },
-  picker: {
-  color: '#333',
-  fontSize: 16,
-  height: 50,
-},
-input: {
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 6,
-  paddingHorizontal: 12,
-  paddingVertical: Platform.OS === 'ios' ? 14 : 0,
-  marginBottom: 10,
-  fontSize: 16,
-  height: 50,
-  backgroundColor: '#fff',
-  justifyContent: 'center',
-},
 });

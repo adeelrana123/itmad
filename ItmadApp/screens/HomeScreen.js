@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchAllProducts, fetchBestSellers } from '../services/api';
+import { fetchBestSellers } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BannerListScreen from '../components/BannerListScreen';
 import BrandsList from '../components/BrandsList';
@@ -26,8 +26,6 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [avatar, setAvatar] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [allBestSellers, setAllBestSellers] = useState([]);
 
@@ -51,6 +49,7 @@ const HomeScreen = () => {
     if (!query) {
       setFilteredProducts([]);
       setHasSearched(false);
+        setLoading(false); 
       return;
     }
 

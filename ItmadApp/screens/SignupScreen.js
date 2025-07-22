@@ -22,7 +22,7 @@ const SignupScreen = ({ navigation }) => {
 await AsyncStorage.setItem('username', response.user?.username || username);
 await AsyncStorage.setItem('email', response.user?.email || email);
       Alert.alert('Success', 'Account created successfully!');
-      navigation.replace('MainTabs'); 
+      navigation.replace('Login'); 
     } catch (error) {
       console.error('Signup error:', error);
       const errorMessage = error.response?.data?.message || 'Signup failed. Please try again.';

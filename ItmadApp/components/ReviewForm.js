@@ -12,7 +12,8 @@ import { createreview } from '../services/api';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 
-const ReviewForm = ({ productSlug, reviewerId, userEmail }) => {
+const ReviewForm = ({ productSlug, reviewerId, userEmail, onRequireLogin }) => {
+
     const navigation = useNavigation();
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(0);
@@ -25,17 +26,32 @@ const useremail =user?.email
 
 
   const handleSubmit = async () => {
-   if (!userEmail) {
+    if (!userEmail || !reviewerId) {
+  if (onRequireLogin) {
+    onRequireLogin();
+  }
+  return;
+}
+
+ if (!userEmail) {
   Alert.alert(
     'Login Required',
     'Please login first to submit a review.',
     [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Login', onPress: () => navigation.navigate('Login') },
+      { 
+        text: 'Login', 
+        onPress: () => navigation.navigate('Login', { 
+          redirectBackTo: navigation.getState().routes[navigation.getState().index].name,
+          productSlug,
+          reviewerId,
+        }) 
+      },
     ]
   );
   return;
 }
+
 
     if (!review || rating === 0) {
       Alert.alert('Error', 'Please write a review and select a rating.');
@@ -57,7 +73,7 @@ const useremail =user?.email
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Your Email</Text>
-      <TextInput value={useremail} editable={false} style={styles.input} />
+      <TextInput value={useremail} editable={false} style={styles.input}  placeholder='Your Email'/>
 
       <Text style={styles.label}>Review</Text>
       <TextInput
