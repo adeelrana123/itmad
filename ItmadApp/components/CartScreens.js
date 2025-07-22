@@ -94,9 +94,9 @@ const CartScreens = () => {
     };
 
     try {
-      console.log("🟢 Sending order...", orderPayload);
+      // console.log("🟢 Sending order...", orderPayload);
       const response = await createOrder(orderPayload);
-      console.log("✅ Order response:", response.data);
+      // console.log("✅ Order response:", response.data);
 
       Alert.alert('Success', 'Order submitted successfully!');
       dispatch(clearCart());
@@ -140,39 +140,39 @@ const CartScreens = () => {
             placeholder="Full Name"
             style={styles.input}
             onChangeText={text => handleChange('fullName', text)}
-            placeholderTextColor="#333"
+            placeholderTextColor="#000"
           />
           <TextInput
             placeholder="City"
             style={styles.input}
             onChangeText={text => handleChange('city', text)}
-            placeholderTextColor="#333"
+            placeholderTextColor="#000"
           />
           <TextInput
             placeholder="Street Address"
             style={styles.input}
             onChangeText={text => handleChange('street', text)}
-            placeholderTextColor="#333"
+             placeholderTextColor="#000"
           />
           <TextInput
             placeholder="Apartment, Suite, etc. (optional)"
             style={styles.input}
             onChangeText={text => handleChange('apartment', text)}
-            placeholderTextColor="#333"
+            placeholderTextColor="#000"
           />
           <TextInput
             placeholder="Mobile Number"
             style={styles.input}
             keyboardType="phone-pad"
             onChangeText={text => handleChange('mobile', text)}
-            placeholderTextColor="#333"
+             placeholderTextColor="#000"
           />
           <TextInput
             placeholder="Email Address (optional)"
             style={styles.input}
             keyboardType="email-address"
             onChangeText={text => handleChange('email', text)}
-            placeholderTextColor="#333"
+             placeholderTextColor="#000"
           />
           <TextInput
             placeholder="Additional Instructions (optional)"
@@ -180,7 +180,7 @@ const CartScreens = () => {
             multiline
             numberOfLines={4}
             onChangeText={text => handleChange('note', text)}
-            placeholderTextColor="#333"
+             placeholderTextColor="#000"
           />
         </View>
       </ScrollView>

@@ -12,11 +12,14 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const Wattsup = () => {
   const navigation = useNavigation();
 
-  const openWhatsApp = () => {
-    const phoneNumber = '+92 307 1111832'; 
-    const url = `https://wa.me/${phoneNumber}`;
-    Linking.openURL(url).catch(err => console.error('Failed to open WhatsApp:', err));
-  };
+ const openWhatsApp = () => {
+  const phoneNumber = '923071111832'; 
+  const message = 'Hello, I have a question regarding a product on Etimad Mart. Can you please assist me?';
+  const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  
+  Linking.openURL(url).catch(err => console.error('Failed to open WhatsApp:', err));
+};
+
 
   return (
     <View style={{ flex: 1 }}>

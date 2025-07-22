@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
    totalTexts: { fontSize: 18,
      fontWeight: 'bold', 
-     color:'#FF3B30',
+     color: '#FF9800',
      textAlign:"center"
      },
   totalText: { fontSize: 14,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
      },
       totalTextbill: { fontSize: 18,
      fontWeight: 'bold', 
-     color:'#FF3B30',
+     color: '#FF9800',
      },
   clearButton: {
     backgroundColor: '#FF3B30',

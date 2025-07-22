@@ -108,11 +108,11 @@ const BestSellers = ({ products = [], loading = false, title = "Best Sellers" })
             {item.price > item.salePrice && (
               <Text style={styles.originalPrice}>Rs. {item.price}</Text>
             )}
-            <Text style={styles.productPrice}> Rs. {item.salePrice}</Text>
+            <Text style={styles.productPrice}>    Rs. {item.salePrice}</Text>
           </View>
           <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
           <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
             <StarRating rating={minRating} />
             <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
               {reviewsCount > 0 ? `(${reviewsCount})` : ''}
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   productName: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
     color: '#333',
   },
@@ -225,8 +225,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   productPrice: {
-    fontWeight: 'bold',
-    color: '#e53935',
+      fontWeight: 'bold',
+    color: '#FF9800',
     fontSize: 18,
   },
   priceContainer: {
@@ -235,9 +235,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   originalPrice: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 13,
+    color: '#999',
     textDecorationLine: 'line-through',
+    marginRight: 5,
   },
   noDataContainer: {
     justifyContent: 'center',

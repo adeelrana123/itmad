@@ -31,7 +31,7 @@ const ProductDescription = ({ width, description, longDescription, styles }) => 
               strong: {
                 fontWeight: 'bold',
                 // color: '#000',
-                color:'red'
+                color: '#FF9800'
               },
               h3: {
                 fontSize: 18,
@@ -78,7 +78,7 @@ const ProductDescription = ({ width, description, longDescription, styles }) => 
               p: { color: '#444', fontSize: 16, lineHeight: 22 },
               strong: { fontWeight: 'bold',
                 //  color: '#000',
-                 color:'red'
+                 color: '#FF9800'
                  },
             }}
           />

@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5',
     padding: 5, borderRadius: 8, marginTop: 10, justifyContent: 'space-between'
   },
-  salePrice: { fontSize: 22, fontWeight: 'bold', color: '#FF6B00', marginRight: 10 },
+  salePrice: { fontSize: 22, fontWeight: 'bold', color: '#FF9800', marginRight: 10 },
   originalPrice: {
     fontSize: 18,
     color: '#888',
@@ -45,10 +45,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   activeTabText: {
-    color: '#FF6B00',
+    color: 'white',
   },
   activeTabButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#FF9800',
   },
   inactiveTabButton: {
     backgroundColor: 'black',
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   discountBox: {
-    backgroundColor: '#FF6B00',
+    backgroundColor: '#FF9800',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 4,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   reviewButtonBottom: {
     flex: 1,
-    backgroundColor: '#FFA000',
+    backgroundColor:  '#FF9800',
     marginRight: 5,
     padding: 12,
     borderRadius: 8,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#4CAF50',
     marginRight: 5,
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
     flexDirection: 'row',

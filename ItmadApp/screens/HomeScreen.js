@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { fetchBestSellers } from '../services/api';
+import { fetchBestSellers, fetchNewArrivals, fetchTrendingProducts } from '../services/api';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BannerListScreen from '../components/BannerListScreen';
 import BrandsList from '../components/BrandsList';
@@ -27,20 +27,33 @@ const HomeScreen = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasSearched, setHasSearched] = useState(false);
-  const [allBestSellers, setAllBestSellers] = useState([]);
+
+  // State for each category
+  const [bestSellers, setBestSellers] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAll = async () => {
       setLoading(true);
       try {
-        const data = await fetchBestSellers(1, 100);
-        setAllBestSellers(data.products || []);
+        // Fetch best sellers
+        const bestSellersData = await fetchBestSellers(1, 100);
+        setBestSellers(bestSellersData.products || []);
+
+        // Similarly fetch trending and new arrivals — replace with your API calls
+        const trendingData = await fetchTrendingProducts(1, 100);
+        setTrending(trendingData.products || []);
+
+        const newArrivalsData = await fetchNewArrivals(1, 100);
+        setNewArrivals(newArrivalsData.products || []);
+
       } catch (err) {
-        console.log('❌ Error fetching best sellers:', err?.message || err);
+        console.error('Error fetching products:', err);
       }
       setLoading(false);
     };
-    fetchData();
+    fetchAll();
   }, []);
 
   useEffect(() => {
@@ -49,7 +62,7 @@ const HomeScreen = () => {
     if (!query) {
       setFilteredProducts([]);
       setHasSearched(false);
-        setLoading(false); 
+      setLoading(false);
       return;
     }
 
@@ -57,15 +70,20 @@ const HomeScreen = () => {
     setHasSearched(true);
 
     const timer = setTimeout(() => {
-      const filtered = allBestSellers.filter(item => {
+      // Merge all products arrays
+      const allProducts = [...bestSellers, ...trending, ...newArrivals];
+
+     const uniqueProducts = Array.from(new Map(allProducts.map(p => [p._id || p.id, p])).values());
+      // Filter by search query (title, brand, category)
+      const filtered = uniqueProducts.filter(item => {
         const title = item.title?.toLowerCase() ?? '';
         const brand = item.brand?.name?.toLowerCase() ?? '';
         const category = item.category?.name?.toLowerCase() ?? '';
 
         return (
-          (title && title.includes(query)) ||
-          (brand && brand.includes(query)) ||
-          (category && category.includes(query))
+          title.includes(query) ||
+          brand.includes(query) ||
+          category.includes(query)
         );
       });
 
@@ -74,7 +92,7 @@ const HomeScreen = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, allBestSellers]);
+  }, [searchQuery, bestSellers, trending, newArrivals]);
 
   const handleSearch = () => {
     const trimmed = searchQuery.trim();
@@ -117,7 +135,7 @@ const HomeScreen = () => {
       position: 'absolute',
       right: 10,
       padding: 10,
-      backgroundColor: 'orange',
+      backgroundColor:'#FF9800',
       borderRadius: 8,
       justifyContent: 'center',
       alignItems: 'center',
@@ -209,11 +227,11 @@ const HomeScreen = () => {
           
           <TrendingProductsPaginated />
           <NewArrivals />
-          <BestSellers 
-            products={allBestSellers} 
-            loading={false} 
-            title="Best Sellers"
-          />
+         <BestSellers 
+  products={bestSellers} 
+  loading={false} 
+  title="Best Sellers"
+/>
         </>
       )}
     </>

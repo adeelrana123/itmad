@@ -15,7 +15,7 @@ import { fetchTrendingProducts } from '../services/api';
 import Pagination from './Pagination';
 import Icon from 'react-native-vector-icons/FontAwesome';
 const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 50) / 2.5;
+const cardWidth = (screenWidth - 50) / 2;
 const PAGE_SIZE = 10;
 const TrendingProducts = () => {
   const navigation = useNavigation();
@@ -89,15 +89,15 @@ const reviewsCount = item.reviews?.length || 0;
         )}
 
         <View style={styles.productInfoContainer}>
-          {/* <View style={styles.priceContainer}>
+          <View style={styles.priceContainer}>
             {item.price > item.salePrice && (
               <Text style={styles.originalPrice}>Rs. {item.price}</Text>
             )}
-            <Text style={styles.productPrice}>Rs. {item.salePrice}</Text>
-          </View> */}
-          {/* <Text style={styles.productName} numberOfLines={1}>{item.title}</Text> */}
+            <Text style={styles.productPrice}>    Rs. {item.salePrice}</Text>
+          </View>
+          <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
           <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
-           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
                     <StarRating rating={minRating} />
                    <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
           {reviewsCount > 0 ? `(${reviewsCount})` : ''}
@@ -138,29 +138,30 @@ const reviewsCount = item.reviews?.length || 0;
 const styles = StyleSheet.create({
   container: { flex:1},
   card: {
-    width: cardWidth,
-    marginRight: 12,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginTop:5,
+   marginRight: 10,
     overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+     width: cardWidth,
+        backgroundColor: '#fff',
+        marginBottom: 10,
+        borderRadius: 10,
+        ...Platform.select({
+          ios: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          },
+          android: {
+            elevation: 2,
+          },
+        }),
+    
   },
   image: {
-    width: '100%',
-    height: 90,
+   width: '100%',
+    height: 120,
     resizeMode: 'cover',
-    borderTopLeftRadius: 10,
+   borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   noImageContainer: {
@@ -174,9 +175,10 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 14,
   },
-  productInfoContainer: { padding: 10 },
+  productInfoContainer: { paddingHorizontal: 10, },
   productName: {
-    fontSize: 14,
+    fontSize: 10,
+    fontWeight: '700',
     color: '#333',
   },
   productCategory: {
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#e53935',
+     color: '#FF9800',
   },
   priceContainer: {
     flexDirection: 'row',

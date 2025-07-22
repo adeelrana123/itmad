@@ -218,7 +218,7 @@ const AccountScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.menuItem} onPress={() => handlePress(item.action)}>
             <View style={styles.menuItemLeft}>
-              <FontAwesome name={item.icon} size={20} color="#FF6B00" style={styles.menuIcon} />
+              <FontAwesome name={item.icon} size={20} color= '#FF9800' style={styles.menuIcon} />
               <View>
                 <Text style={styles.menuTitle}>{item.title}</Text>
               </View>
@@ -232,7 +232,7 @@ const AccountScreen = () => {
       {user && (
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <View style={styles.menuItemLeft}>
-            <FontAwesome name="sign-out" size={20} color="#FF6B00" style={styles.menuIcon} />
+            <FontAwesome name="sign-out" size={20} color= '#FF9800' style={styles.menuIcon} />
             <Text style={styles.menuTitle}>Logout</Text>
           </View>
         </TouchableOpacity>
@@ -243,7 +243,7 @@ const AccountScreen = () => {
         <View style={styles.featuresRow}>
           {features.map((feature, index) => (
             <View key={index} style={styles.featureCard}>
-              <FontAwesome name={feature.icon} size={24} color="#FF6B00" />
+              <FontAwesome name={feature.icon} size={24} color= '#FF9800' />
               <Text style={styles.featureTitle}>{feature.title}</Text>
               <Text style={styles.featureDesc}>{feature.desc}</Text>
             </View>
@@ -259,7 +259,7 @@ const AccountScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { backgroundColor: '#FF6B00' },
+  header: { backgroundColor:  '#FF9800' },
   headerText: {
     color: 'white',
     fontSize: 20,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   email: { fontSize: 14, color: 'white', marginTop: 5 },
   authWrapper: {
     padding: 15,
-    backgroundColor: '#FF6B00',
+    backgroundColor:  '#FF9800',
   },
   authButtons: {
     flexDirection: 'row',
@@ -308,8 +308,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
   },
-  buttonText: { color: '#FF6B00', textAlign: 'center', fontWeight: 'bold' },
-  signupButtonText: { color: '#FF6B00', textAlign: 'center', fontWeight: 'bold' },
+  buttonText: { color:  '#FF9800', textAlign: 'center', fontWeight: 'bold' },
+  signupButtonText: { color:  '#FF9800', textAlign: 'center', fontWeight: 'bold' },
   menuItem: {
     backgroundColor: 'white',
     padding: 15,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   menuIcon: { marginRight: 15, width: 24, textAlign: 'center' },
   menuTitle: { fontSize: 16, color: '#333' },
   menuSubText: { fontSize: 12, color: '#888', marginTop: 3 },
-  menuRightText: { color: '#FF6B00', fontSize: 14 },
+  menuRightText: { color:  '#FF9800', fontSize: 14 },
   featuresContainer: {
     padding: 15,
     backgroundColor: 'white',

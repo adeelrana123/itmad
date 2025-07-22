@@ -14,8 +14,9 @@ const appTheme = {
     mutedText: '#666666',
     shadowColor: '#00000033',
     iconColor: '#444444',
-    buttonBackground: '#FF6B00',
+    buttonBackground:  '#FF9800',
     buttonText: '#ffffff',
+
   },
 //   dark: {
 //     background: '#121212',

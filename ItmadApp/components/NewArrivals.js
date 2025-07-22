@@ -14,7 +14,7 @@ import { fetchNewArrivals } from '../services/api';
 import Pagination from './Pagination';
 import Icon from 'react-native-vector-icons/FontAwesome';
 const screenWidth = Dimensions.get('window').width;
-const cardWidth = (screenWidth - 50) / 2.5;
+const cardWidth = (screenWidth - 50) / 2;
 const PAGE_SIZE = 10;
 
 
@@ -111,14 +111,14 @@ const minRating = reviewsCount > 0
         )}
         <View style={styles.productInfoContainer}>
           <View style={styles.priceContainer}>
-            {/* {item.price > item.salePrice && (
+            {item.price > item.salePrice && (
               <Text style={styles.originalPrice}>Rs. {item.price}</Text>
-            )} */}
-            {/* <Text style={styles.productPrice}> Rs. {item.salePrice}</Text> */}
+            )}
+            <Text style={styles.productPrice}>    Rs. {item.salePrice}</Text>
           </View>
-          {/* <Text style={styles.productName} numberOfLines={1}>{item.title}</Text> */}
+          <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
           <Text style={styles.productCategory} numberOfLines={1}>{item.category?.name}</Text>
-<View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+<View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
           <StarRating rating={minRating} />
          <Text style={{ marginLeft: 6, fontSize: 12, color: '#666' }}>
 {reviewsCount > 0 ? `(${reviewsCount})` : ''}
@@ -161,17 +161,30 @@ const styles = StyleSheet.create({
   flex:1
   },
   card: {
-    width: cardWidth,
     marginRight: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
     overflow: 'hidden',
-    elevation: 2,
+     width: cardWidth,
+        backgroundColor: '#fff',
+        marginBottom: 10,
+        borderRadius: 10,
+        ...Platform.select({
+          ios: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          },
+          android: {
+            elevation: 2,
+          },
+        }),
   },
   image: {
     width: '100%',
     height: 120,
     resizeMode: 'cover',
+   borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   noImageContainer: {
     width: '100%',
@@ -188,7 +201,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: '700',
     color: '#333',
   },
@@ -199,7 +212,7 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     fontWeight: 'bold',
-    color: '#e53935',
+    color: '#FF9800',
     fontSize: 18,
   },
   priceContainer: {
@@ -207,8 +220,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   originalPrice: {
-    fontSize: 16,
-    color: '#888',
+   fontSize: 13,
+    color: '#999',
     textDecorationLine: 'line-through',
     marginRight: 5,
   },
